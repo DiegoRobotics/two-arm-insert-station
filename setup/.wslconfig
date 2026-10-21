@@ -1,3 +1,3 @@
 [wsl2]
+# 16 GB host: leave ~6 GB for Windows, SolidWorks, browser
 memory=10GB
-processors=6

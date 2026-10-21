@@ -2,7 +2,7 @@
 
 | Phase | Status |
 |---|---|
-| 1 Research and environment setup | Research done · stack approved 2026-10-21 · **install in progress** |
+| 1 Research and environment setup | **Done** 2026-10-21 (Gazebo GUI not yet opened) |
 | 2 Digital twin and kinematics | Not started |
 | 3 Virtual tool changer | Not started |
 | 4 Mechanical development | Not started |
