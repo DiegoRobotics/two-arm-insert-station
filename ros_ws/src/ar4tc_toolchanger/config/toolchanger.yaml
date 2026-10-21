@@ -1,0 +1,32 @@
+# Simulation tool-change demo. Units: m, rad. Frame: base_link (MK3 faces -Y at J1 = 0).
+base_frame: base_link
+group: ar_manipulator
+tip_link: ee_link                     # flange (= link_6)
+arm_joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+trajectory_action: /joint_trajectory_controller/follow_joint_trajectory
+gripper_action: /gripper_controller/gripper_cmd
+velocity_scaling: 0.3
+acceleration_scaling: 0.3
+
+# ASSUMPTION: TCP = gripper jaw joint origin, 36 mm along flange z (from URDF). Measure on the real gripper.
+tcp_offset: [0.0, 0.0, 0.036]
+touch_links: [link_6, ee_link, gripper_base_link, gripper_jaw1_link, gripper_jaw2_link]
+
+home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]  # SRDF "home"; note J5 = 0 is a wrist singularity
+
+tolerances:
+  pos_mm: 1.0                # proposed, see KINEMATICS.md
+  rot_deg: 0.5
+  min_manipulability: 1.0e-4 # provisional
+  home_joint_deg: 0.5
+  place_mm: 2.0              # released tool must land within this of its slot
+
+approach_height: 0.10        # pre-dock height above the coupling pose
+grasp_depth: 0.015           # TCP goes this far below the tool's top face
+gripper: {open: 0.014, closed: 0.004}
+
+# Placeholder geometry: robot's right side (-X when it faces -Y). Not from CAD.
+dock: {center: [-0.28, -0.13, 0.03], size: [0.10, 0.30, 0.06]}
+tools:
+  tool_a: {slot_xy: [-0.28, -0.20], size: [0.03, 0.03, 0.07]}
+  tool_b: {slot_xy: [-0.28, -0.06], size: [0.03, 0.03, 0.07]}

@@ -1,4 +1,9 @@
-# Architecture (proposed — not implemented)
+# Architecture
+
+**Implemented so far (2026-10-21):** one package, `ros_ws/src/ar4tc_toolchanger`, with separate modules: `kinematics.py` (Pinocchio, no ROS), `motion.py` (MoveIt client), `scene.py` (dock/tools), `toolchange_demo.py` (state machine), `goto_pose.py`, `ik_benchmark.py`, and `config/toolchanger.yaml`. The modules will be split into the packages below once they grow.
+Source lives in OneDrive (git). `setup/build.sh` copies it with rsync into `~/ar4tc_ws/src/ar4tc` and builds there.
+
+## Target layout
 
 ROS 2 Jazzy colcon workspace. Upstream code is pinned in `ar4tc.repos` and never edited. All project packages use the `ar4tc_` prefix.
 

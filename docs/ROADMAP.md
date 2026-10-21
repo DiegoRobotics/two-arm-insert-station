@@ -3,8 +3,8 @@
 | Phase | Status |
 |---|---|
 | 1 Research and environment setup | **Done** 2026-10-21 (Gazebo GUI not yet opened) |
-| 2 Digital twin and kinematics | Not started |
-| 3 Virtual tool changer | Not started |
+| 2 Digital twin and kinematics | **Milestone 1 met** 2026-10-21 (`goto_pose`, IK benchmark; see KINEMATICS.md) |
+| 3 Virtual tool changer | **First demo working** 2026-10-21: 2 placeholder tools, pick/return/pick sequence (TOOLCHANGE_SIM_PROCEDURE.md) |
 | 4 Mechanical development | Not started |
 | 5 Physical integration | Not started. Don't command the real robot until sim and safety checks pass |
 
@@ -30,7 +30,14 @@
 
 Not yet tested: Gazebo launch, pick_ik plugin, Cartesian pose targets, and multi-pose statistics. These are Phase 2 work.
 
-## Milestone 1 (Phase 2) — acceptance criteria
+## Next
+- [ ] pick_ik vs KDL comparison (launch override, upstream untouched)
+- [ ] FK cross-check against Annin `kinematics.cpp` for the same joint angles
+- [ ] Per-tool TCP and payload switching (tool registry), tool-specific collision shapes
+- [ ] Gazebo run of the sequence
+- [ ] Replace placeholder dock and tools with SolidWorks geometry (Phase 4)
+
+## Milestone 1 (Phase 2) — acceptance criteria (met; this section is kept as the reference)
 `ros2 run ar4tc_motion goto_pose 0.25 0.0 0.30 180 0 0` (example only, reachability not checked) shows the simulated MK3 reaching the pose, and the log reports:
 - IK solution within limits, manipulability above the threshold
 - FK pose error below the targets (proposed: 1 mm, 0.5°; to be set from test data)

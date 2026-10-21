@@ -24,4 +24,6 @@ Open questions: what physically fixed the communication and J5 problems (cable, 
 - 2026-10-21: `wsl --install -d Ubuntu-24.04` stalled at 49.2% (network down to about 0 MB/s). **Fix:** kill `wsl.exe`, then run `wsl --install --web-download -d Ubuntu-24.04 --no-launch`, which downloads from GitHub instead of the Store. It finished, and WSL 3.0.3 / kernel 6.18 worked **without a reboot**.
 - Linux user `gael` was created by script and has **no password** yet. Set one with `wsl -u root passwd gael`. `sudo` won't work until you do (the temporary no-password sudo rule was removed after setup).
 - `setup_wsl_ros.sh` stopped at `source /opt/ros/jazzy/setup.bash` with `AMENT_TRACE_SETUP_FILES: unbound variable`, because ROS setup files fail under `set -u`. **Fix:** `set +u` before sourcing (now in the script).
+- Pinocchio `ValueError: Some components of min_effort are greater than max_effort`: the upstream URDF has `effort="-1"`. **Fix:** `kinematics.py` replaces it with 1000 in memory (the upstream file is unchanged).
+- A planning-scene call hung until timeout when made right after the node started (service not discovered yet). **Fix:** `wait_for_service` before scene calls.
 - Restore backup: `wsl --unregister Ubuntu-24.04` (deletes the current install), then `wsl --import Ubuntu-24.04 <install dir> <backup .tar>`.
