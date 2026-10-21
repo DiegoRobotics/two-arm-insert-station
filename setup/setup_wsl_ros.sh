@@ -31,6 +31,7 @@ mkdir -p $WS/src && cd $WS/src
 [ -d ar4_ros_driver ] || git clone https://github.com/ycheng517/ar4_ros_driver.git
 git -C ar4_ros_driver checkout $AR4_DRIVER_COMMIT
 cd $WS
+set +u   # ROS setup scripts reference unset variables
 source /opt/ros/jazzy/setup.bash
 [ -f /etc/ros/rosdep/sources.list.d/20-default.list ] || sudo rosdep init
 rosdep update

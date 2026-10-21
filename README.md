@@ -16,8 +16,9 @@ AR4-ToolChanger/        (this folder, OneDrive, git)  docs, setup scripts, CAD e
 ```
 
 ## Setup
-1. **Admin** PowerShell: `wsl --install -d Ubuntu-24.04`, then reboot, open "Ubuntu", create a Linux user.
-2. Optional: copy `setup/.wslconfig` to `%UserProfile%\.wslconfig` (caps WSL RAM at 10 GB), then run `wsl --shutdown`.
+1. **Admin** PowerShell: `wsl --install --web-download -d Ubuntu-24.04`. Use `--web-download`, because the Store download stalled on this PC.
+2. Copy `setup/.wslconfig` to `%UserProfile%\.wslconfig` (caps WSL RAM at 10 GB), then run `wsl --shutdown`.
+   On this PC, the default user `gael` was created by script (`/etc/wsl.conf`: systemd on, default user gael).
 3. In Ubuntu:
    ```bash
    bash "/mnt/c/Users/gael1/OneDrive/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/setup/setup_wsl_ros.sh"
