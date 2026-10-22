@@ -26,4 +26,10 @@ Open questions: what physically fixed the communication and J5 problems (cable, 
 - `setup_wsl_ros.sh` stopped at `source /opt/ros/jazzy/setup.bash` with `AMENT_TRACE_SETUP_FILES: unbound variable`, because ROS setup files fail under `set -u`. **Fix:** `set +u` before sourcing (now in the script).
 - Pinocchio `ValueError: Some components of min_effort are greater than max_effort`: the upstream URDF has `effort="-1"`. **Fix:** `kinematics.py` replaces it with 1000 in memory (the upstream file is unchanged).
 - A planning-scene call hung until timeout when made right after the node started (service not discovered yet). **Fix:** `wait_for_service` before scene calls.
+- Launch error `launch configuration 'tf_prefix' does not exist`: upstream controller YAML uses `$(var tf_prefix)`. **Fix:** `bringup.launch.py` declares `tf_prefix`.
+- Gazebo: the gripper action returned before the jaw finished moving (jaw at 9.7 of 14 mm), so the state machine raised FAULT. **Fix:** `motion.gripper()` polls `/joint_states` for up to 3 s.
+- MoveGroup code −10 (start state in collision) after attaching a tool: `touch_links` lacked the gripper links. **Fix:** always list them (harmless if absent).
+- Compiling Annin `kinematics.cpp` on Linux: GCC rejects MSVC-style template lookups. **Fix:** `-fpermissive`.
+- `PYTHONPATH=dir python3` drops ROS paths (pinocchio not found). **Fix:** `PYTHONPATH=dir:$PYTHONPATH`.
+- **Hardware compatibility (not a bug):** Annin v6.0 = old microstepping; ROS driver mk3 and Annin v6.1+ = doubled steps/°. See REAL_ROBOT.md.
 - Restore backup: `wsl --unregister Ubuntu-24.04` (deletes the current install), then `wsl --import Ubuntu-24.04 <install dir> <backup .tar>`.

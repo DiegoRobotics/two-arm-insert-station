@@ -6,7 +6,7 @@
 | 2 Digital twin and kinematics | **Milestone 1 met** 2026-10-21 (`goto_pose`, IK benchmark; see KINEMATICS.md) |
 | 3 Virtual tool changer | **First demo working** 2026-10-21: 2 placeholder tools, pick/return/pick sequence (TOOLCHANGE_SIM_PROCEDURE.md) |
 | 4 Mechanical development | Not started |
-| 5 Physical integration | Not started. Don't command the real robot until sim and safety checks pass |
+| 5 Physical integration | Blocked on route decision (REAL_ROBOT.md). Real-test config and launch ready, not run on hardware |
 
 ## Phase 1 checklist
 - [x] User approves stack (see RESEARCH.md)
@@ -31,10 +31,12 @@
 Not yet tested: Gazebo launch, pick_ik plugin, Cartesian pose targets, and multi-pose statistics. These are Phase 2 work.
 
 ## Next
-- [ ] pick_ik vs KDL comparison (launch override, upstream untouched)
-- [ ] FK cross-check against Annin `kinematics.cpp` for the same joint angles
+- [x] pick_ik vs KDL comparison: KDL kept (KINEMATICS.md), 2026-10-22
+- [x] FK cross-check against Annin `kinematics.cpp`: match except a 7 mm URDF J3 offset (KINEMATICS.md)
+- [x] Gazebo run of the sequence: DONE 17/17 (TOOLCHANGE_SIM_PROCEDURE.md)
+- [ ] Real robot: choose route A (ROS firmware + DIP) or B (bridge to Annin v6.0). See REAL_ROBOT.md
+- [ ] Measure the 7 mm J3 offset on the physical arm
 - [ ] Per-tool TCP and payload switching (tool registry), tool-specific collision shapes
-- [ ] Gazebo run of the sequence
 - [ ] Replace placeholder dock and tools with SolidWorks geometry (Phase 4)
 
 ## Milestone 1 (Phase 2) — acceptance criteria (met; this section is kept as the reference)

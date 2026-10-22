@@ -1,0 +1,35 @@
+# FIRST REAL-ROBOT DRY RUN: same motion pattern as toolchanger.yaml, but
+#  - 10 % speed/acceleration
+#  - virtual dock raised 100 mm (lowest TCP point ~215 mm above the robot base plane)
+#  - no gripper (runs with include_gripper:=False; the Nano IO board is not connected)
+# The dock and tools exist only in MoveIt. Nothing physical should be placed there.
+base_frame: base_link
+group: ar_manipulator
+tip_link: ee_link
+arm_joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+trajectory_action: /joint_trajectory_controller/follow_joint_trajectory
+gripper_action: /gripper_controller/gripper_cmd
+velocity_scaling: 0.1
+acceleration_scaling: 0.1
+
+tcp_offset: [0.0, 0.0, 0.036]   # virtual point 36 mm beyond the flange (kept identical to sim)
+touch_links: [link_6, ee_link, gripper_base_link, gripper_jaw1_link, gripper_jaw2_link]  # gripper links harmless if absent
+use_gripper: false
+
+home: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+tolerances:
+  pos_mm: 1.0
+  rot_deg: 0.5
+  min_manipulability: 1.0e-4
+  home_joint_deg: 0.5
+  place_mm: 2.0
+
+approach_height: 0.10
+grasp_depth: 0.015
+gripper: {open: 0.014, closed: 0.004}
+
+dock: {center: [-0.28, -0.13, 0.13], size: [0.10, 0.30, 0.06]}
+tools:
+  tool_a: {slot_xy: [-0.28, -0.20], size: [0.03, 0.03, 0.07]}
+  tool_b: {slot_xy: [-0.28, -0.06], size: [0.03, 0.03, 0.07]}
