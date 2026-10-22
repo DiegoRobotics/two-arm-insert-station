@@ -26,6 +26,8 @@ setup(
             "toolchange_demo = ar4tc_toolchanger.toolchange_demo:main",
             "goto_pose = ar4tc_toolchanger.goto_pose:main",
             "ik_benchmark = ar4tc_toolchanger.ik_benchmark:main",
+            "annin_bridge = ar4tc_toolchanger.annin_bridge:main",
+            "annin_emulator = ar4tc_toolchanger.annin_emulator:main",
         ],
     },
 )

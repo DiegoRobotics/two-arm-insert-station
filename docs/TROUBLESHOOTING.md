@@ -32,4 +32,7 @@ Open questions: what physically fixed the communication and J5 problems (cable, 
 - Compiling Annin `kinematics.cpp` on Linux: GCC rejects MSVC-style template lookups. **Fix:** `-fpermissive`.
 - `PYTHONPATH=dir python3` drops ROS paths (pinocchio not found). **Fix:** `PYTHONPATH=dir:$PYTHONPATH`.
 - **Hardware compatibility (not a bug):** Annin v6.0 = old microstepping; ROS driver mk3 and Annin v6.1+ = doubled steps/°. See REAL_ROBOT.md.
+- annin_bridge crashed on a rejected goal: `ValueError: Logger severity cannot be changed between calls`. rclpy forbids one call site logging at different levels. **Fix:** separate `error()`/`info()` calls. Found by `tools/bridge_fault_test.py`.
+- Fault test hung: child processes kept the shell pipe open after `timeout`. **Fix:** write to a log file, use `timeout -k`.
+- Real robot rest pose J2 = −41.832° is within 1° of the −42° limit. The bridge applies its 1° margin to the **target only**.
 - Restore backup: `wsl --unregister Ubuntu-24.04` (deletes the current install), then `wsl --import Ubuntu-24.04 <install dir> <backup .tar>`.

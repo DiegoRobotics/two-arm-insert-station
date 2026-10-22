@@ -66,8 +66,8 @@ To move them, edit `slot_xy` in the YAML and rebuild.
 First Gazebo attempt failed at OPEN (jaw still moving). That's a real timing effect the mock hid; fixed by waiting for the jaw (TROUBLESHOOTING.md).
 
 ## 5c. Launch options (2026-10-22)
-`bringup.launch.py mode:=mock|gazebo|real ik:=kdl|pick_ik run:=true|false rviz:=true|false include_gripper:=True|False`
-`toolchange_demo.launch.py` = bringup with `run:=true`. Real mode refuses `run:=true`.
+`bringup.launch.py mode:=mock|gazebo|annin|annin_emu ik:=kdl|pick_ik run:=true|false rviz:=true|false include_gripper:=True|False`
+`toolchange_demo.launch.py` = bringup with `run:=true`. `mode:=annin` (real robot) refuses `run:=true`. The earlier `mode:=real` (ROS firmware) was removed on 2026-10-22 (REAL_ROBOT.md).
 Real-robot dry-run config: `config/toolchanger_real_test.yaml` (10 % speed, dock +100 mm, no gripper). Mock run: DONE 17/17, 110.9 s.
 
 ## 6. Limits of this result
