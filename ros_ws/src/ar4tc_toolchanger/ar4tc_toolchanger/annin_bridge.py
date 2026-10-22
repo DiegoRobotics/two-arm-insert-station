@@ -44,6 +44,7 @@ class AnninBridge(Node):
         self.start_tol = p("start_tolerance_deg", 1.0).value
         self.goal_tol = p("goal_tolerance_deg", 0.5).value
         self.limit_margin = p("limit_margin_deg", 1.0).value
+        p("max_travel_deg", 0.0)  # 0 = off; read per goal, so `ros2 param set` works while running
         self.acc, self.dcc, self.ramp = p("acc_pct", 20.0).value, p("dcc_pct", 20.0).value, p("ramp_pct", 20.0).value
         self.poll_hz = p("poll_hz", 10.0).value
         self.reply_timeout = p("reply_timeout_s", 2.0).value
@@ -168,14 +169,27 @@ class AnninBridge(Node):
         times = [ap.duration_from_msg(pt.time_from_start) for pt in traj.points]
         pts = np.array([ap.ros_to_annin([pt.positions[i] for i in order]) for pt in traj.points])
 
-        # Every point inside the firmware limits; the target also keeps a safety margin.
-        # (No margin on intermediate points: the HMI rest pose, J2 = -41.8, is itself within 1 deg of -42.)
+        # Every point inside the firmware limits. Joints that move must also end >= limit_margin inside.
+        # (A joint that stays put may sit inside the margin: the HMI rest pose has J2 = -41.8 next to -42.)
         for k, q in enumerate(pts):
-            if not ap.within_limits(q, self.limit_margin if k == len(pts) - 1 else 0.0):
+            if not ap.within_limits(q):
                 return self._abort(handle, R.INVALID_GOAL, f"point {k} outside firmware limits: {np.round(q, 2).tolist()}")
+        moved = np.abs(pts[-1] - self.q_deg) > 0.05
+        in_margin = (pts[-1] < -ap.LIM_NEG + self.limit_margin) | (pts[-1] > ap.LIM_POS - self.limit_margin)
+        if np.any(moved & in_margin):
+            return self._abort(handle, R.INVALID_GOAL, f"target within {self.limit_margin} deg of a limit: "
+                                                       f"{np.round(pts[-1], 2).tolist()}")
         dev = float(np.max(np.abs(pts[0] - self.q_deg)))
         if dev > self.start_tol:
             return self._abort(handle, R.INVALID_GOAL, f"trajectory starts {dev:.2f} deg from the measured position")
+
+        max_travel = self.get_parameter("max_travel_deg").value
+        travel = np.max(np.abs(pts - self.q_deg), axis=0)
+        if max_travel > 0 and travel.max() > max_travel:
+            j = int(travel.argmax())
+            return self._abort(handle, R.INVALID_GOAL,
+                               f"J{j + 1} would travel {travel[j]:.1f} deg > max_travel_deg {max_travel:g} "
+                               f"(travel per joint: {np.round(travel, 1).tolist()})")
 
         times = [t - times[0] for t in times]
         times, pts = ap.simplify(times, np.vstack([self.q_deg, pts[1:]]), self.path_tol)

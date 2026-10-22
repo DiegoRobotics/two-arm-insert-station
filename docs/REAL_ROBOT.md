@@ -11,6 +11,8 @@ It needs its own Teensy firmware and the v6.1+ DIP-switch microstepping (2× ste
 winget install --exact dorssel.usbipd-win
 ```
 
+Done 2026-10-22: usbipd-win installed. The Teensy (`16c0:0483`, COM5) is at **BUSID 2-5** and bound ("Shared"). The bind persists, so each session only needs `usbipd attach --wsl --busid 2-5`. The attach is lost if WSL shuts down (`wsl --shutdown` or idle timeout); re-run attach.
+
 ## Procedure for each session
 1. **Prepare in the HMI 6.0 (as usual):** power the robot, connect, calibrate/home, and move to a safe pose with the arm raised. **Write down the 6 joint angles the HMI shows.**
 2. **Release the port:** close the HMI. Keep the robot **powered**; calibration lives in the Teensy's memory.
@@ -24,11 +26,14 @@ winget install --exact dorssel.usbipd-win
    ```bash
    ros2 service call /annin_bridge/enable std_srvs/srv/SetBool "{data: true}"
    ```
-6. **First moves from RViz** (hand on the E-stop):
-   - MotionPlanning panel → Planning tab: **Velocity Scaling 0.05, Acceleration Scaling 0.05**.
-   - Joints tab: change **one joint by about 5°**, then Plan & Execute. Repeat for each joint.
+6. **First moves from RViz** (hand on the E-stop). The bridge refuses any trajectory moving a joint more than **15°** (`max_travel_deg`).
+   - Planning tab: **Velocity Scaling 0.05, Acceleration Scaling 0.05**.
+   - **Always reset the goal first:** Planning tab → *Goal State* → choose **`<current>`** (choose it again even if it's already shown). The orange goal robot must overlap the real robot model.
+   - Joints tab: change **one joint by about 5°** (type the value, press Enter). Only that joint of the orange robot should move.
+   - Click **Plan** (not Plan & Execute). Watch the preview: only that joint should move. Then click **Execute**.
    - Check every joint moves the way RViz shows. **J1:** RViz +5° should make the HMI angle −5°. If any joint moves the wrong way, E-stop and report it.
-   - Then drag the end-effector marker a few cm, and Plan & Execute.
+   - Then drag the end-effector marker a few cm, Plan, check, Execute.
+   - Before step 7, lift the travel limit: `ros2 param set /annin_bridge max_travel_deg 0.0`
 7. **Tool-change dry run** (same pattern as the simulation, virtual dock raised 100 mm, 10 % speed, no gripper):
    ```bash
    ros2 run ar4tc_toolchanger toolchange_demo $(ros2 pkg prefix ar4tc_toolchanger)/share/ar4tc_toolchanger/config/toolchanger_real_test.yaml

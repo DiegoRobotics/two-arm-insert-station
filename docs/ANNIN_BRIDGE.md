@@ -37,7 +37,7 @@ Measured by comparing the URDF with Annin's own kinematics (KINEMATICS.md). **Ch
 
 ## 4. What happens to one MoveIt trajectory
 1. **Accept or reject:** the goal is rejected unless motion is **enabled** (`~/enable`), the robot position is known, and nothing else is running.
-2. **Check:** joint names; every point within the firmware limits (the target also needs ≥ 1° margin); the trajectory start within **1°** of the measured position.
+2. **Check:** joint names; every point within the firmware limits; joints that move must end ≥ 1° inside their limits; the trajectory start within **1°** of the measured position; no joint travels more than `max_travel_deg` (default **15°**, 0 = off, changeable live: `ros2 param set /annin_bridge max_travel_deg <deg>`).
 3. **Reduce:** MoveIt sends dense trajectories (e.g. 64–171 points). The firmware moves all joints **linearly in step space** between targets, so the bridge keeps only the points needed to stay within **0.2°** of the planned path (Douglas-Peucker). In tests, 1,193 points became 30 RJ commands.
 4. **Time:** each segment uses its planned duration, stretched if any joint would exceed **20°/s** (hard cap), minimum 0.4 s.
 5. **Execute:** one blocking `RJ` per segment. The firmware can't answer while moving, so during a segment `/joint_states` shows a **linear estimate**. Each RJ reply provides the **measured** position.
