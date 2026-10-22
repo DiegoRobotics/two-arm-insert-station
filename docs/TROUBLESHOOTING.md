@@ -35,4 +35,9 @@ Open questions: what physically fixed the communication and J5 problems (cable, 
 - annin_bridge crashed on a rejected goal: `ValueError: Logger severity cannot be changed between calls`. rclpy forbids one call site logging at different levels. **Fix:** separate `error()`/`info()` calls. Found by `tools/bridge_fault_test.py`.
 - Fault test hung: child processes kept the shell pipe open after `timeout`. **Fix:** write to a log file, use `timeout -k`.
 - Real robot rest pose J2 = −41.832° is within 1° of the −42° limit. The bridge applies its 1° margin to the **target only**.
+### First hardware session (2026-10-22, bridge to Annin v6.0)
+- Bridge connected first time. The position read (0, 0, 0, 0.020, 89.981, 0) matched the HMI's saved pose exactly. usbipd attach and closing the HMI did **not** reset the Teensy.
+- **Unexpected large move:** RViz started while `/dev/ttyACM0` was not attached yet, so its goal state was all zeros. Changing J1 by 5° sent (5.24°, 0, 0, 0, 0, 0), and the robot also moved **J5 89.98° → 0°** (and J4 0.02° → 0), over 51 s at 5 % speed. It finished correctly (0.007° error). Cause: the goal state wasn't reset to `<current>`, and my step-6 instructions didn't say to. **Fixes:** (1) REAL_ROBOT.md step 6 now says reset Goal State → `<current>`, then Plan, check, Execute; (2) bridge `max_travel_deg` (default 15°) refuses larger trajectories, and can be changed live with `ros2 param set`.
+- Later Plan & Execute clicks did nothing: move_group logged "Goal constraints are already satisfied" (the goal equalled the current pose).
+- Bridge bug found while testing the fix: the 1° target margin refused any move while J2 sat at the rest pose (−41.83°). The margin now applies only to joints that move.
 - Restore backup: `wsl --unregister Ubuntu-24.04` (deletes the current install), then `wsl --import Ubuntu-24.04 <install dir> <backup .tar>`.

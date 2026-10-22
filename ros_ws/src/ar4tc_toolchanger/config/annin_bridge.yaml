@@ -9,6 +9,8 @@ annin_bridge:
     start_tolerance_deg: 1.0      # trajectory start vs measured position
     goal_tolerance_deg: 0.5       # final measured position vs target
     limit_margin_deg: 1.0         # target must stay this far inside the firmware limits
+    max_travel_deg: 15.0          # refuse any trajectory moving a joint further than this (0 = off).
+                                  # Raise it for the tool-change run: ros2 param set /annin_bridge max_travel_deg 0.0
     acc_pct: 20.0                 # RJ "Ac": % of each move used to accelerate
     dcc_pct: 20.0                 # RJ "Dc": % of each move used to decelerate
     ramp_pct: 20.0                # RJ "Rm": accel ramp amplitude (HMI "percentage")
