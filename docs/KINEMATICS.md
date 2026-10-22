@@ -36,5 +36,26 @@ MoveIt IK (KDL, from upstream `kinematics.yaml`) → Pinocchio FK of the solutio
 | `goto_pose 0.0 -0.30 0.25 0 180 0` | REACHED, final TCP error 0.485 mm / 0.085° |
 | `goto_pose 0.0 -0.80 0.25 …` (out of reach) | Correctly refused: "no collision-free IK solution", exit 1 |
 
-The 5 IK misses are probably KDL starting from the singular home seed. Next step: try pick_ik, overriding the kinematics plugin in our own launch file (not by editing upstream).
-Not yet done: comparing FK against Annin's own `kinematics.cpp` on the same joint angles, which is needed before using HMI coordinates.
+## KDL vs pick_ik (2026-10-22, 500 random reachable flange poses, seed = home, mock)
+| Solver | Solved + validated | Max pos error | Max orient. error | Mean / max time |
+|---|---|---|---|---|
+| **KDL** (upstream settings) | **490/500 (98.0 %)** | 0.0079 mm | 0.0006° | **0.002 / 0.024 s** |
+| pick_ik (global, 50 ms, 0.1 mm threshold) | 446/500 (89.2 %) | 0.0997 mm | 0.011° | 0.038 / 0.157 s |
+| pick_ik tuned (global, 250 ms, 0.01 mm threshold) | 464/500 (92.8 %) | 0.0100 mm | 0.001° | 0.111 / 1.907 s |
+
+**Decision: KDL stays the default** (`ik:=kdl`). pick_ik remains selectable (`ik:=pick_ik`, `config/kinematics_pick_ik.yaml`). Both are set from our launch file; upstream is untouched.
+
+## Cross-check against Annin HMI 6.0 (2026-10-22)
+Method: compiled a **copy** of Annin's `kinematics.cpp`/`bindings.cpp` in WSL (GCC needs `-fpermissive`), loaded the DH table the HMI stores in `ARbot.cal`, and compared with the URDF (Pinocchio) on 500 random joint sets. Repeat with `tools/annin_fk_check/annin_fk_check.sh`.
+
+| Check | Result |
+|---|---|
+| Annin FK copy vs the HMI's own saved pose (J = 0, −41.832, −4.284, 0, 89.981, 0) | X 44.668 / Y 0.000 / Z 529.075 mm, **exact match** |
+| Joint mapping | **Annin J1 = −URDF J1**; J2–J6 identical; no offsets |
+| Base frames | Annin X = −URDF Y, Annin Y = URDF X, Z equal |
+| Flange frames | Annin flange = URDF `ee_link` rotated +90° about z; constant within 0.0036° |
+| **Position difference** | **7.000 mm constant, sideways** (min 6.998, max 7.001) |
+
+Cause of the 7 mm: the URDF's J3 origin is `xyz="0 -0.305 0.007"`, an offset along the J3 axis. Annin's DH table has none. **Unresolved:** which matches the physical arm. Measure it on the robot before using HMI coordinates in ROS or vice versa.
+Note: Annin's orientation output is a rotation vector (rad). Its float32 conversion becomes unstable within about 0.05 rad of 180° (an Annin-side issue).
+Note: `robot_set()` defaults in `kinematics.cpp` (α6 = 180°) do **not** match the HMI; the HMI uses the `ARbot.cal` table (α6 = −90°).

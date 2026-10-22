@@ -139,16 +139,19 @@ class MoveItClient:
         out = self._action(self.exec_ac, g, 60.0)
         return out.error_code.val == SUCCESS, f"{len(pts)} pts, exec code {out.error_code.val}"
 
-    def gripper(self, position, effort=10.0):
+    def gripper(self, position, effort=10.0, settle_timeout=3.0, tol=1e-3):
         g = GripperCommand.Goal()
         g.command.position, g.command.max_effort = float(position), effort
         self.grip_ac.wait_for_server(10.0)
         self._action(self.grip_ac, g, 15.0)
-        pos = self._js.get("gripper_jaw1_joint")
-        self.joint_positions(0.3)
-        pos = self._js.get("gripper_jaw1_joint", pos)
-        ok = pos is not None and abs(pos - position) < 1e-3
-        return ok, f"jaw at {pos:.4f} m" if pos is not None else "no jaw state"
+        # The action can return before a physical jaw (Gazebo, real servo) has finished moving.
+        deadline, pos = time.time() + settle_timeout, None
+        while time.time() < deadline:
+            self.joint_positions(0.1)
+            pos = self._js.get("gripper_jaw1_joint")
+            if pos is not None and abs(pos - position) < tol:
+                return True, f"jaw at {pos:.4f} m"
+        return False, f"jaw at {pos:.4f} m after {settle_timeout} s" if pos is not None else "no jaw state"
 
     # ---- planning scene -------------------------------------------------
     def apply_scene(self, scene: PlanningScene):

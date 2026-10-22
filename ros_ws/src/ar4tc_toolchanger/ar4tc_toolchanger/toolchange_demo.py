@@ -89,8 +89,13 @@ class ToolChanger:
         world = {o.id: o for o in sc.world.collision_objects}
         return attached, world
 
+    def _grip(self, key):
+        if not self.cfg.get("use_gripper", True):
+            return True, "gripper disabled in config (skipped)"
+        return self.mv.gripper(self.cfg["gripper"][key])
+
     def _couple(self, tool):
-        ok, info = self.mv.gripper(self.cfg["gripper"]["closed"])
+        ok, info = self._grip("closed")
         if not ok:
             return False, f"gripper: {info}"
         if not self.mv.apply_scene(scene.attach(self.cfg, tool)):
@@ -102,7 +107,7 @@ class ToolChanger:
         return True, f"{tool} attached to {self.cfg['tip_link']}; {info}"
 
     def _release(self, tool):
-        ok, info = self.mv.gripper(self.cfg["gripper"]["open"])
+        ok, info = self._grip("open")
         if not ok:
             return False, f"gripper: {info}"
         if not self.mv.apply_scene(scene.detach(self.cfg, tool)):
@@ -130,7 +135,7 @@ class ToolChanger:
         grasp = scene.tcp_target(self.cfg, tool)
         above = scene.tcp_target(self.cfg, tool, self.cfg["approach_height"])
         self._run(S.APPROACH, f"above {tool}", lambda: self._approach(above))
-        self._run(S.OPEN, "gripper open", lambda: self.mv.gripper(self.cfg["gripper"]["open"]))
+        self._run(S.OPEN, "gripper open", lambda: self._grip("open"))
         self._run(S.DESCEND, f"onto {tool}", lambda: self._linear(grasp))
         self._run(S.COUPLE, tool, lambda: self._couple(tool))
         self._run(S.RETREAT, f"lift {tool}", lambda: self._linear(above))

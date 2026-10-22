@@ -3,7 +3,7 @@
 Digital twin and automatic tool changer for an Annin AR4 MK3 (Teensy 4.1, Annin HMI 6.0).
 Status: **Phase 1 done; Phase 2 milestone met; first simulated tool-change sequence working.**
 
-Docs: [TOOL-CHANGE SIM PROCEDURE](docs/TOOLCHANGE_SIM_PROCEDURE.md) · [RESEARCH](docs/RESEARCH.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [KINEMATICS](docs/KINEMATICS.md) · [ROADMAP](docs/ROADMAP.md) · [TROUBLESHOOTING](docs/TROUBLESHOOTING.md)
+Docs: [TOOL-CHANGE SIM PROCEDURE](docs/TOOLCHANGE_SIM_PROCEDURE.md) · [REAL ROBOT](docs/REAL_ROBOT.md) · [RESEARCH](docs/RESEARCH.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [KINEMATICS](docs/KINEMATICS.md) · [ROADMAP](docs/ROADMAP.md) · [TROUBLESHOOTING](docs/TROUBLESHOOTING.md)
 
 ## Quick start (Ubuntu app)
 ```bash

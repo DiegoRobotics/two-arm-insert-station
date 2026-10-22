@@ -54,8 +54,24 @@ To move them, edit `slot_xy` in the YAML and rebuild.
 | Manipulability at the approach poses | 0.010–0.015 (well above 1e-4) |
 | Unit tests | 6/6 pass |
 
+## 5b. Gazebo run (2026-10-22): `toolchange_demo.launch.py mode:=gazebo`
+| Check | Result |
+|---|---|
+| Sequence | **DONE, 17/17**, 59.0 s (report `docs/reports/toolchange_gazebo_20261022_092816.json`) |
+| TCP error, joint-space approach | 0.23–0.42 mm, ≤ 0.15° |
+| TCP error, straight-line moves | 0.005–0.12 mm, ≤ 0.08° |
+| tool_a placement error | 1.58 mm (limit 2 mm) |
+| Jaw position reached | 13.1 mm open (target 14 mm, 1 mm tolerance); 4.9–5.0 mm closed |
+
+First Gazebo attempt failed at OPEN (jaw still moving). That's a real timing effect the mock hid; fixed by waiting for the jaw (TROUBLESHOOTING.md).
+
+## 5c. Launch options (2026-10-22)
+`bringup.launch.py mode:=mock|gazebo|real ik:=kdl|pick_ik run:=true|false rviz:=true|false include_gripper:=True|False`
+`toolchange_demo.launch.py` = bringup with `run:=true`. Real mode refuses `run:=true`.
+Real-robot dry-run config: `config/toolchanger_real_test.yaml` (10 % speed, dock +100 mm, no gripper). Mock run: DONE 17/17, 110.9 s.
+
 ## 6. Limits of this result
 - **Kinematic simulation only.** Mock hardware follows commands perfectly. There's no physics, no contact forces and no real servo lag. The 0.000 mm figures show the logic is consistent, not that the real robot will be accurate to that level.
 - Dock and tool dimensions and the 36 mm TCP are **assumptions**. They get replaced by SolidWorks geometry (Phase 4) and a measured TCP.
 - Collision checking is off during the 100 mm docking moves. On hardware this segment will need slow speed and force or position monitoring.
-- Gazebo isn't used yet. RViz with mock hardware is enough for this milestone.
+- Gazebo checks the arm's control and dynamics only. The dock and tools exist in MoveIt, not in the Gazebo world, so no contact physics is simulated yet.
