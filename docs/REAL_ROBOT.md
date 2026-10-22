@@ -1,5 +1,7 @@
 # Running the Tool-Change Motion on the Real AR4 MK3
 
+> **Update 2026-10-22:** the main route to the real robot is now the **HMI 6.0 program export** (HMI_EXPORT.md): the HMI runs the robot, ROS is only used to develop and check programs. The ROS bridge below stays available as an option.
+
 **Decision 2026-10-22: route B.** Annin HMI/sketch **v6.0 is the only version used**. The robot (firmware, DIP switches, calibration) is **not changed**. ROS drives it through `annin_bridge` (how it works: ANNIN_BRIDGE.md).
 Status: bridge tested against the emulator only. **Not yet run on hardware.**
 

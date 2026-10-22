@@ -13,6 +13,9 @@ setup(
         (f"share/{package_name}", ["package.xml"]),
         (f"share/{package_name}/config", glob("config/*.yaml")),
         (f"share/{package_name}/launch", glob("launch/*.py")),
+        (f"share/{package_name}/urdf", glob("urdf/*.xacro")),
+        (f"share/{package_name}/srdf", glob("srdf/*.xacro")),
+        (f"share/{package_name}/rviz", glob("rviz/*.rviz")),
     ],
     install_requires=["setuptools"],
     zip_safe=True,
@@ -28,6 +31,8 @@ setup(
             "ik_benchmark = ar4tc_toolchanger.ik_benchmark:main",
             "annin_bridge = ar4tc_toolchanger.annin_bridge:main",
             "annin_emulator = ar4tc_toolchanger.annin_emulator:main",
+            "export_hmi = ar4tc_toolchanger.export_hmi:main",
+            "hmi_check = ar4tc_toolchanger.hmi_check:main",
         ],
     },
 )

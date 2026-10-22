@@ -1,4 +1,25 @@
-# Simulated Tool Change — Procedure (Phase 2, 2026-10-21)
+# Simulated Tool Change — Procedure
+
+## Current version (2026-10-22): tool-changer model, no gripper
+| Item | What changed |
+|---|---|
+| Robot model | `urdf/ar4tc.urdf.xacro`: upstream MK3 arm + **tool-changer master** (Ø50 × 20 mm cylinder on the flange) + `tc_mating` frame at its face. **No gripper.** SRDF `srdf/ar4tc.srdf.xacro` adds the master's collision pairs. Used in mock and bridge modes (Gazebo keeps the upstream gripper model and refuses `run:=true`) |
+| Dock | Base plate + **two cradle posts per slot**. Each tool's coupling plate rests on its posts with the body hanging between them |
+| Tools | `tool_a` "Gripper tool": plate + box body + 2 fingers, orange. `tool_b` "Generic tool (probe)": plate + cylinder + tip, blue. Each has its own **TCP** (`tcp` TF frame follows the held tool) and payload (logged) |
+| Collision checking | **On for every move, including docking.** The coupling face stops `dock_gap` = 1 mm above the plate; docked tools rest 1 mm above their posts |
+| Sequence | `sequence:` list in the config (`home`, `{pick: tool}`, `{place: tool}`) |
+| HOME | = HMI `Home.ar4` (J5 = 90°, flange down) |
+| RViz | `rviz/ar4tc.rviz`: upstream MoveIt view + slot labels + `tc_mating`/`tcp` axes. Dock and tools are coloured scene objects |
+| Recording | Every run writes `~/ar4tc_reports/program_*.json` for the HMI export (HMI_EXPORT.md) |
+| Configs | `extends:` lets a config override another one (e.g. `toolchanger_real_test.yaml` = +100 mm dock, 10 % speed) |
+
+Results (mock, 2026-10-22): **DONE 15/15** in 52.7–59.8 s, twice in a row in one simulation; coupling-face error ≤ 0.46 mm (free moves) and 0.000 mm (straight docking moves); placement error 0.000 mm. Through the bridge emulator: DONE, 1,078 MoveIt points → 30 RJ segments. Raised-dock config: DONE, 120.2 s.
+
+Run it: `ros2 launch ar4tc_toolchanger toolchange_demo.launch.py` (RViz + sequence), or `bringup.launch.py` then `ros2 run ar4tc_toolchanger toolchange_demo [config.yaml]`.
+
+---
+## Earlier version (2026-10-21): kept for the record
+(It used the upstream servo-gripper model, placeholder box tools and collision checking off during docking. Superseded by the version above.)
 
 Goal: in simulation, the MK3 goes HOME → picks **tool_a** → HOME → returns tool_a to its slot → picks **tool_b** → HOME. Every step is checked independently.
 

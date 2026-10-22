@@ -4,7 +4,7 @@
 |---|---|
 | 1 Research and environment setup | **Done** 2026-10-21 (Gazebo GUI not yet opened) |
 | 2 Digital twin and kinematics | **Milestone 1 met** 2026-10-21 (`goto_pose`, IK benchmark; see KINEMATICS.md) |
-| 3 Virtual tool changer | **First demo working** 2026-10-21: 2 placeholder tools, pick/return/pick sequence (TOOLCHANGE_SIM_PROCEDURE.md) |
+| 3 Virtual tool changer | **Working** 2026-10-22: master + dock/cradles + 2 tools, collision-checked, exported to HMI 6.0 programs (HMI_EXPORT.md) |
 | 4 Mechanical development | Not started |
 | 5 Physical integration | Bridge to Annin v6.0 built and emulator-tested; **first hardware session pending** (REAL_ROBOT.md) |
 
@@ -36,7 +36,12 @@ Not yet tested: Gazebo launch, pick_ik plugin, Cartesian pose targets, and multi
 - [x] Gazebo run of the sequence: DONE 17/17 (TOOLCHANGE_SIM_PROCEDURE.md)
 - [x] Real robot route chosen: **B**, bridge to Annin v6.0 (2026-10-22)
 - [x] `annin_bridge` built; emulator tests: sequence DONE 17/17, fault test 14/14 (ANNIN_BRIDGE.md)
-- [ ] First hardware session following REAL_ROBOT.md (confirm unknowns: J1 sign, USB attach, CL, timing)
+- [x] First hardware session (2026-10-22): connection and one move OK; two-bridge incident → Teensy reset; safety locks added. **Robot then out of service (J5/J6 physical issue).**
+- [x] Simulation upgraded: tool-changer master (no gripper), dock with cradles, 2 coloured tools with own TCPs, collision checking on while docking, configurable sequence, RViz labels
+- [x] **HMI 6.0 export:** `export_hmi` (Move R programs) + `hmi_check` (replays .ar4 in sim, collision-checked); 2 programs in `hmi_programs/`, both PASS (HMI_EXPORT.md)
+- [ ] After repair: raised-dock dry run in the HMI; confirm J1 direction using the docking-pose comment
+- [ ] Separate callable HMI sub-programs per tool (pick/return) for use with vision programs
+- [ ] Real dock/tool CAD → replace placeholder geometry
 - [ ] Measure the 7 mm J3 offset on the physical arm
 - [ ] Per-tool TCP and payload switching (tool registry), tool-specific collision shapes
 - [ ] Replace placeholder dock and tools with SolidWorks geometry (Phase 4)
