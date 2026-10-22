@@ -46,6 +46,12 @@ Measured by comparing the URDF with Annin's own kinematics (KINEMATICS.md). **Ch
 
 While idle, it polls `RP` at 10 Hz for `/joint_states` and watches for an unsolicited E-stop line.
 
+**Connection safety (added after the first hardware session):**
+- The serial port is opened **exclusively**, so no second process can use it.
+- If another `annin_bridge` node appears, motion **locks**.
+- Losing the connection switches motion off.
+- After reconnecting, an **all-zero position** (sketch v6.0's power-on state, meaning uncalibrated) or a jump of **> 1°** from the last reading **locks** motion. `~/enable` then refuses until the bridge is restarted after recalibrating in the HMI.
+
 ## 5. Differences from the simulation controller
 - **Stop-and-go:** each RJ segment accelerates and decelerates (Ac/Dc 20 %). Joint-space moves are usually one segment; straight-line docking moves were 4–5 segments in testing. Annin's spline mode (`SL`/`MS`/`SS`) could smooth this later.
 - MoveIt's execution-time monitoring is **off** in bridge modes (the bridge enforces its own timeouts, `seconds × 3 + 5 s`), because stop-and-go segments take longer than MoveIt's plan.

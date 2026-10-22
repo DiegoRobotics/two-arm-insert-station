@@ -55,6 +55,8 @@ class AnninBridge(Node):
         self.ext_deg = (0.0, 0.0, 0.0)
         self.moving = False
         self.estimate_deg = None              # interpolated estimate published while a blocking RJ runs
+        self.last_known_deg = None            # survives disconnects, to detect position jumps / Teensy resets
+        self.suspect = ""                     # non-empty = enabling refused until the bridge is restarted
 
         cb = ReentrantCallbackGroup()
         self.js_pub = self.create_publisher(JointState, "/joint_states", 10)
@@ -66,7 +68,16 @@ class AnninBridge(Node):
                                    cancel_callback=lambda _: CancelResponse.ACCEPT, callback_group=cb)
         self.create_timer(1.0 / self.poll_hz, self._poll, callback_group=cb)
         self.create_timer(0.05, self._publish, callback_group=cb)
+        self.create_timer(3.0, self._check_duplicates, callback_group=cb)
         self._status(f"starting; port {self.port}; motion {'ENABLED' if self.enabled else 'DISABLED'}")
+
+    def _check_duplicates(self):
+        """Two bridges both answer MoveIt's trajectory goals (and would fight over the port, though the
+        exclusive lock prevents that). Lock motion in every instance that sees a twin."""
+        if not self.suspect and [n for n, _ in self.get_node_names_and_namespaces()].count(self.get_name()) > 1:
+            self.enabled, self.suspect = False, "another annin_bridge node is running"
+            self._status("MOTION LOCKED: another annin_bridge is running. Stop ALL launches (Ctrl+C in every "
+                         "window), then start exactly one.", True)
 
     # ---- serial ---------------------------------------------------------
     def _status(self, text, error=False):
@@ -79,7 +90,8 @@ class AnninBridge(Node):
 
     def _open(self):
         if self.ser is None:
-            self.ser = serial.Serial(self.port, self.baud, timeout=0.1)
+            # exclusive: a second process (another bridge, ModemManager, ...) can't open the port meanwhile
+            self.ser = serial.Serial(self.port, self.baud, timeout=0.1, exclusive=True)
             time.sleep(0.2)
             self.ser.reset_input_buffer()
             self._status(f"serial open: {self.port}")
@@ -115,19 +127,36 @@ class AnninBridge(Node):
                     self._fault("E-stop pressed")
             r = ap.parse_reply(self._transact("RP\n", self.reply_timeout))
             if r.joints_deg is not None and r.raw.startswith("A"):
-                if self.q_deg is None:  # first reading after connecting: compare with the HMI display
+                if self.q_deg is None:  # first reading after (re)connecting: compare with the HMI display
                     self._status("robot position, Annin/HMI degrees J1..J6: "
                                  + " ".join(f"{v:.3f}" for v in r.joints_deg))
+                    self._check_reconnect(r.joints_deg)
                 self.q_deg, self.ext_deg = r.joints_deg, r.ext_deg
+                self.last_known_deg = r.joints_deg
             if not r.ok and self.enabled:
                 self._fault(r.alarm)
         except (serial.SerialException, OSError, TimeoutError) as e:
             if self.ser is not None:
                 self.ser.close()
             self.ser, self.q_deg = None, None
-            self._status(f"no connection: {e}", error=True)
+            if self.enabled:
+                self._fault(f"connection lost ({e})")
+            else:
+                self._status(f"no connection: {e}", error=True)
         finally:
             self.lock.release()
+
+    def _check_reconnect(self, q):
+        # Sketch v6.0 starts with every joint at exactly 0.000 after power-up/reset (StepM = zeroStep),
+        # i.e. uncalibrated. A real calibrated pose of all zeros to 3 decimals is practically impossible.
+        if np.all(np.abs(q) < 0.0005):
+            self.suspect = "all joints read 0.000: Teensy was reset/power-cycled and is NOT calibrated"
+        elif self.last_known_deg is not None and np.max(np.abs(q - self.last_known_deg)) > 1.0:
+            self.suspect = (f"position jumped {np.max(np.abs(q - self.last_known_deg)):.2f} deg across a "
+                            "reconnect: controller state is not trustworthy")
+        if self.suspect:
+            self.enabled = False
+            self._status(f"MOTION LOCKED: {self.suspect}. Recalibrate in the HMI, then restart the bridge.", True)
 
     def _publish(self):
         q = self.estimate_deg if self.moving and self.estimate_deg is not None else self.q_deg
@@ -138,6 +167,9 @@ class AnninBridge(Node):
         self.js_pub.publish(js)
 
     def _on_enable(self, req, res):
+        if req.data and self.suspect:
+            res.success, res.message = False, f"locked: {self.suspect}"
+            return res
         if req.data and self.q_deg is None:
             res.success, res.message = False, "no position from robot yet"
             return res
