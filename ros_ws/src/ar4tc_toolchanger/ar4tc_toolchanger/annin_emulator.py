@@ -38,6 +38,7 @@ def main():
     ap_.add_argument("--speedup", type=float, default=1.0)
     ap_.add_argument("--estop-at-move", type=int, default=0)
     ap_.add_argument("--collision-at-move", type=int, default=0)
+    ap_.add_argument("--start-zero", action="store_true", help="start like a freshly reset (uncalibrated) Teensy")
     args, _ = ap_.parse_known_args()
 
     master, slave = os.openpty()
@@ -47,7 +48,7 @@ def main():
     os.symlink(os.ttyname(slave), args.link)
     print(f"annin_emulator: {args.link} -> {os.ttyname(slave)}", flush=True)
 
-    q, moves, buf = np.array(REST), 0, b""
+    q, moves, buf = np.zeros(6) if args.start_zero else np.array(REST), 0, b""
     while True:
         buf += os.read(master, 1024)
         while b"\n" in buf:

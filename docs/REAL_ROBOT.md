@@ -41,7 +41,14 @@ Done 2026-10-22: usbipd-win installed. The Teensy (`16c0:0483`, COM5) is at **BU
    Any failed check stops the robot (FAULT) and disables motion. The JSON report is saved in `~/ar4tc_reports/`.
 8. **Finish:** Ctrl-C both terminals, then `usbipd detach --busid <BUSID>` (PowerShell). Open the HMI again and check its displayed angles look right.
 
+## If the USB drops or the bridge says MOTION LOCKED
+1. Ctrl+C in **every** Ubuntu window that runs a launch. Check with `pgrep -af annin_bridge` (must print nothing).
+2. PowerShell: close the minimized `usbipd … --auto-attach` window, then `usbipd detach --busid 2-5`.
+3. HMI 6.0: recalibrate (all joints), move to a safe pose, write down the angles, close the HMI.
+4. `usbipd attach --wsl --busid 2-5 --auto-attach` (leave the window open), then start **one** launch (step 4).
+
 ## Safety rules
+- **Only one launch at a time.** Stop the old one (Ctrl+C) before starting a new one. Two bridges caused a Teensy reset on 2026-10-22.
 - Clear workspace. Nothing where the virtual dock is (about 280 mm to the robot's right, 130–200 mm up). E-stop within reach. Stay next to the robot.
 - The bridge caps joints at **20°/s** and refuses targets outside the firmware limits. That's not a substitute for supervision.
 - A move in progress **can't be stopped over USB**. The physical E-stop is the only immediate stop.
