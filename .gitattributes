@@ -4,3 +4,4 @@
 *.stl binary
 *.SLDPRT binary
 *.SLDASM binary
+*.ar4 -text

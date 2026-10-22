@@ -41,8 +41,9 @@ class MoveItClient:
         self.get_scene_srv = node.create_client(GetPlanningScene, "/get_planning_scene")
         self.move_ac = ActionClient(node, MoveGroup, "/move_action")
         self.exec_ac = ActionClient(node, ExecuteTrajectory, "/execute_trajectory")
-        self.grip_ac = ActionClient(node, GripperCommand, cfg["gripper_action"])
+        self.grip_ac = ActionClient(node, GripperCommand, cfg.get("gripper_action", "/gripper_controller/gripper_cmd"))
         self.traj_ac_name = cfg["trajectory_action"]
+        self.last_trajectory = None   # joint trajectory of the last executed motion (for recording)
 
     # ---- plumbing -------------------------------------------------------
     def _wait(self, future, timeout=30.0):
@@ -115,6 +116,7 @@ class MoveItClient:
             for j, v in zip(self.joints, q)])]
         g.planning_options.plan_only = False
         res = self._action(self.move_ac, g, 90.0)
+        self.last_trajectory = res.planned_trajectory.joint_trajectory
         return res.error_code.val == SUCCESS, f"MoveGroup code {res.error_code.val}"
 
     def move_linear(self, flange: pin.SE3, avoid_collisions=True, step=0.005):
@@ -136,6 +138,7 @@ class MoveItClient:
         if not pts or (pts[-1].time_from_start.sec == 0 and pts[-1].time_from_start.nanosec == 0):
             return False, "cartesian path not time-parameterized"
         g = ExecuteTrajectory.Goal(trajectory=res.solution)
+        self.last_trajectory = res.solution.joint_trajectory
         out = self._action(self.exec_ac, g, 60.0)
         return out.error_code.val == SUCCESS, f"{len(pts)} pts, exec code {out.error_code.val}"
 

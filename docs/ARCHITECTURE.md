@@ -1,6 +1,6 @@
 # Architecture
 
-**Implemented so far (2026-10-21):** one package, `ros_ws/src/ar4tc_toolchanger`, with separate modules: `kinematics.py` (Pinocchio, no ROS), `motion.py` (MoveIt client), `scene.py` (dock/tools), `toolchange_demo.py` (state machine), `goto_pose.py`, `ik_benchmark.py`, and `config/toolchanger.yaml`. Hardware: `annin_bridge.py` (ROS node: FollowJointTrajectory + /joint_states over Annin v6.0 serial), `annin_protocol.py` (no ROS), `annin_emulator.py` (pty stand-in). See ANNIN_BRIDGE.md. The modules will be split into the packages below once they grow.
+**Implemented so far (2026-10-21):** one package, `ros_ws/src/ar4tc_toolchanger`, with separate modules: `kinematics.py` (Pinocchio, no ROS), `motion.py` (MoveIt client), `scene.py` (dock/tools), `toolchange_demo.py` (state machine), `goto_pose.py`, `ik_benchmark.py`, and `config/toolchanger.yaml`. HMI path: `export_hmi.py` (program JSON → .ar4 Move R), `hmi_program.py` (.ar4 read/write), `hmi_check.py` (replay .ar4 in sim), `annin_kinematics.py` (HMI FK, HMI coordinates). Model: `urdf/ar4tc.urdf.xacro`, `srdf/ar4tc.srdf.xacro`, `rviz/ar4tc.rviz`. Optional ROS hardware path: `annin_bridge.py` (ROS node: FollowJointTrajectory + /joint_states over Annin v6.0 serial), `annin_protocol.py` (no ROS), `annin_emulator.py` (pty stand-in). See ANNIN_BRIDGE.md. The modules will be split into the packages below once they grow.
 Source lives in OneDrive (git). `setup/build.sh` copies it with rsync into `~/ar4tc_ws/src/ar4tc` and builds there.
 
 ## Target layout

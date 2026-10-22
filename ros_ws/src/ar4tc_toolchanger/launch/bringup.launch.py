@@ -42,27 +42,36 @@ def _setup(context):
     mode, model = a["mode"], a["ar_model"]
     if mode not in ("mock", "gazebo", "annin", "annin_emu"):
         raise RuntimeError(f"mode must be mock|gazebo|annin|annin_emu, got {mode}")
+    if mode == "gazebo" and a["run"] == "true":
+        raise RuntimeError("the tool-change sequence needs the tool-changer model; Gazebo uses the upstream "
+                           "gripper model. Use mode:=mock (or annin_emu).")
     if mode == "annin" and a["run"] == "true":
         raise RuntimeError("run:=true is refused with mode:=annin (real robot); start the sequence by hand (REAL_ROBOT.md)")
     bridge = mode.startswith("annin")
-    grip = "False" if bridge else a["include_gripper"]   # the bridge drives the arm only
-    sim_time = {"use_sim_time": mode == "gazebo"}
+    gazebo = mode == "gazebo"
+    sim_time = {"use_sim_time": gazebo}
 
-    robot_description = {"robot_description": _xacro(
-        "annin_ar4_description", "urdf/ar.urdf.xacro", ar_model=model, include_gripper=grip)}
-    semantic = {"robot_description_semantic": _xacro(
-        "annin_ar4_moveit_config", "srdf/ar.srdf.xacro", name=model, include_gripper=grip)}
+    if gazebo:  # upstream Gazebo model (servo gripper, no tool-changer master)
+        grip = a["include_gripper"]
+        robot_description = {"robot_description": _xacro(
+            "annin_ar4_description", "urdf/ar.urdf.xacro", ar_model=model, include_gripper=grip)}
+        semantic = {"robot_description_semantic": _xacro(
+            "annin_ar4_moveit_config", "srdf/ar.srdf.xacro", name=model, include_gripper=grip)}
+    else:       # our model: MK3 arm + tool-changer master, no gripper (mock ros2_control only in mock mode)
+        robot_description = {"robot_description": _xacro(
+            "ar4tc_toolchanger", "urdf/ar4tc.urdf.xacro", ar_model=model, mock=str(mode == "mock").lower())}
+        semantic = {"robot_description_semantic": _xacro("ar4tc_toolchanger", "srdf/ar4tc.srdf.xacro")}
     kinematics = {"robot_description_kinematics": _yaml("ar4tc_toolchanger", f"config/kinematics_{a['ik']}.yaml")}
     joint_limits = ParameterFile(PathJoinSubstitution(
         [FindPackageShare("annin_ar4_moveit_config"), "config/joint_limits.yaml"]), allow_substs=True)
     planning = {"default_planning_pipeline": "ompl", "planning_pipelines": ["ompl", "pilz"],
                 "ompl": _yaml("annin_ar4_moveit_config", "config/ompl_planning.yaml"),
                 "pilz": _yaml("annin_ar4_moveit_config", "config/pilz_planning.yaml")}
-    if bridge:
-        controllers = _yaml("ar4tc_toolchanger", "config/moveit_controllers_arm_only.yaml")
-    else:
+    if gazebo:
         controllers = ParameterFile(PathJoinSubstitution(
             [FindPackageShare("annin_ar4_moveit_config"), "config/controllers.yaml"]), allow_substs=True)
+    else:
+        controllers = _yaml("ar4tc_toolchanger", "config/moveit_controllers_arm_only.yaml")
     execution = {"moveit_manage_controllers": False,
                  "moveit_controller_manager": "moveit_simple_controller_manager/MoveItSimpleControllerManager",
                  "trajectory_execution.allowed_execution_duration_scaling": 1.2,
@@ -78,19 +87,19 @@ def _setup(context):
                               execution, controllers, scene_monitor, sim_time])]
     if a["rviz"] == "true":
         nodes.append(Node(package="rviz2", executable="rviz2", output="log",
-                          arguments=["-d", os.path.join(get_package_share_directory("annin_ar4_moveit_config"),
-                                                        "rviz", "moveit.rviz")],
+                          arguments=["-d", os.path.join(get_package_share_directory("ar4tc_toolchanger"),
+                                                        "rviz", "ar4tc.rviz")],
                           parameters=[robot_description, semantic, kinematics, planning, sim_time]))
 
     if mode == "mock":
-        fake = {"robot_description": _xacro("annin_ar4_moveit_config", "urdf/fake_ar.urdf.xacro", ar_model=model)}
         ros2_controllers = ParameterFile(PathJoinSubstitution(
             [FindPackageShare("annin_ar4_driver"), "config", "controllers.yaml"]), allow_substs=True)
-        nodes += [Node(package="robot_state_publisher", executable="robot_state_publisher", parameters=[fake]),
+        nodes += [Node(package="robot_state_publisher", executable="robot_state_publisher",
+                       parameters=[robot_description]),
                   Node(package="controller_manager", executable="ros2_control_node",
-                       parameters=[fake, ros2_controllers, {"tf_prefix": ""}])]
+                       parameters=[robot_description, ros2_controllers, {"tf_prefix": ""}])]
         nodes += [Node(package="controller_manager", executable="spawner", arguments=[c, "-c", "/controller_manager"])
-                  for c in ("joint_state_broadcaster", "joint_trajectory_controller", "gripper_controller")]
+                  for c in ("joint_state_broadcaster", "joint_trajectory_controller")]
     elif mode == "gazebo":
         nodes.append(IncludeLaunchDescription(
             PathJoinSubstitution([FindPackageShare("annin_ar4_gazebo"), "launch", "gazebo.launch.py"]),
@@ -106,7 +115,8 @@ def _setup(context):
         nodes.append(Node(package="ar4tc_toolchanger", executable="annin_bridge", name="annin_bridge", output="screen",
                           parameters=[os.path.join(get_package_share_directory("ar4tc_toolchanger"), "config",
                                                    "annin_bridge.yaml"),
-                                      {"port": port, "start_enabled": emu}]))
+                                      # emulator: no first-session travel limit, so whole sequences run
+                                      {"port": port, "start_enabled": emu, **({"max_travel_deg": 0.0} if emu else {})}]))
 
     if a["run"] == "true":
         cfg = a["demo_config"] or ("toolchanger_real_test.yaml" if bridge else "toolchanger.yaml")
