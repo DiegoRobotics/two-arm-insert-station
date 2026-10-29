@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!-- AR4 MK3 arm (upstream macro, unchanged) + tool-changer master on the flange. No gripper:
+     tools are separate objects picked up by the master. Dimensions are placeholders until CAD. -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="mk3">
+  <xacro:arg name="ar_model" default="mk3"/>
+  <xacro:arg name="mock" default="true"/>             <!-- add mock ros2_control (sim); off for the Annin bridge -->
+  <xacro:arg name="master_radius" default="0.025"/>
+  <xacro:arg name="master_length" default="0.020"/>
+
+  <xacro:include filename="$(find annin_ar4_description)/urdf/ar_macro.xacro"/>
+
+  <link name="world"/>
+  <xacro:ar_robot tf_prefix="" parent="world"
+                  robot_parameters_file="$(find annin_ar4_description)/config/$(arg ar_model).yaml">
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </xacro:ar_robot>
+
+  <!-- Tool-changer master: cylinder on the flange, along ee_link +z (out of the flange face). -->
+  <link name="tc_master">
+    <visual>
+      <origin xyz="0 0 ${$(arg master_length) / 2}"/>
+      <geometry><cylinder radius="$(arg master_radius)" length="$(arg master_length)"/></geometry>
+      <material name="tc_steel"><color rgba="0.55 0.57 0.6 1"/></material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 ${$(arg master_length) / 2}"/>
+      <geometry><cylinder radius="$(arg master_radius)" length="$(arg master_length)"/></geometry>
+    </collision>
+  </link>
+  <joint name="tc_master_joint" type="fixed">
+    <parent link="ee_link"/>
+    <child link="tc_master"/>
+  </joint>
+  <!-- Coupling face: where a tool's coupling plate meets the master. Tool TCPs hang off this frame. -->
+  <link name="tc_mating"/>
+  <joint name="tc_mating_joint" type="fixed">
+    <parent link="tc_master"/>
+    <child link="tc_mating"/>
+    <origin xyz="0 0 $(arg master_length)"/>
+  </joint>
+
+  <xacro:if value="$(arg mock)">
+    <xacro:include filename="$(find annin_ar4_description)/urdf/ar.ros2_control.xacro"/>
+    <xacro:ar_ros2_control
+      ar_model="$(arg ar_model)"
+      plugin_name="mock_components/GenericSystem"
+      serial_port="/dev/null"
+      calibrate="False"
+      robot_parameters_file="$(find annin_ar4_description)/config/$(arg ar_model).yaml"
+      joint_offset_parameters_file="$(find annin_ar4_driver)/config/joint_offsets/$(arg ar_model).yaml"
+      driver_parameters_file="$(find annin_ar4_driver)/config/driver.yaml"
+      tf_prefix=""/>
+  </xacro:if>
+</robot>

@@ -1,0 +1,212 @@
+{
+  "result": "DONE",
+  "held_tool": "tool_b",
+  "total_seconds": 59.0,
+  "config": {
+    "base_frame": "base_link",
+    "group": "ar_manipulator",
+    "tip_link": "ee_link",
+    "arm_joints": [
+      "joint_1",
+      "joint_2",
+      "joint_3",
+      "joint_4",
+      "joint_5",
+      "joint_6"
+    ],
+    "trajectory_action": "/joint_trajectory_controller/follow_joint_trajectory",
+    "gripper_action": "/gripper_controller/gripper_cmd",
+    "velocity_scaling": 0.3,
+    "acceleration_scaling": 0.3,
+    "tcp_offset": [
+      0.0,
+      0.0,
+      0.036
+    ],
+    "touch_links": [
+      "link_6",
+      "ee_link",
+      "gripper_base_link",
+      "gripper_jaw1_link",
+      "gripper_jaw2_link"
+    ],
+    "home": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "tolerances": {
+      "pos_mm": 1.0,
+      "rot_deg": 0.5,
+      "min_manipulability": 0.0001,
+      "home_joint_deg": 0.5,
+      "place_mm": 2.0
+    },
+    "approach_height": 0.1,
+    "grasp_depth": 0.015,
+    "gripper": {
+      "open": 0.014,
+      "closed": 0.004
+    },
+    "dock": {
+      "center": [
+        -0.28,
+        -0.13,
+        0.03
+      ],
+      "size": [
+        0.1,
+        0.3,
+        0.06
+      ]
+    },
+    "tools": {
+      "tool_a": {
+        "slot_xy": [
+          -0.28,
+          -0.2
+        ],
+        "size": [
+          0.03,
+          0.03,
+          0.07
+        ]
+      },
+      "tool_b": {
+        "slot_xy": [
+          -0.28,
+          -0.06
+        ],
+        "size": [
+          0.03,
+          0.03,
+          0.07
+        ]
+      }
+    }
+  },
+  "steps": [
+    {
+      "state": "HOME",
+      "step": "home",
+      "ok": true,
+      "info": "MoveGroup code 1; max joint error 0.000 deg",
+      "seconds": 0.46
+    },
+    {
+      "state": "APPROACH",
+      "step": "above tool_a",
+      "ok": true,
+      "info": "IK q(deg)=[53.3, 23.6, 21.3, 0.0, 45.1, 1.2] w=0.0154; TCP error 0.257 mm / 0.012 deg",
+      "seconds": 6.07
+    },
+    {
+      "state": "OPEN",
+      "step": "gripper open",
+      "ok": true,
+      "info": "jaw at 0.0131 m",
+      "seconds": 1.06
+    },
+    {
+      "state": "DESCEND",
+      "step": "onto tool_a",
+      "ok": true,
+      "info": "34 pts, exec code 1; TCP error 0.083 mm / 0.077 deg",
+      "seconds": 3.88
+    },
+    {
+      "state": "COUPLE",
+      "step": "tool_a",
+      "ok": true,
+      "info": "tool_a attached to ee_link; jaw at 0.0049 m",
+      "seconds": 0.86
+    },
+    {
+      "state": "RETREAT",
+      "step": "lift tool_a",
+      "ok": true,
+      "info": "34 pts, exec code 1; TCP error 0.117 mm / 0.068 deg",
+      "seconds": 3.85
+    },
+    {
+      "state": "HOME",
+      "step": "home",
+      "ok": true,
+      "info": "MoveGroup code 1; max joint error 0.050 deg",
+      "seconds": 5.77
+    },
+    {
+      "state": "APPROACH",
+      "step": "above slot tool_a",
+      "ok": true,
+      "info": "IK q(deg)=[53.3, 23.6, 21.3, 0.0, 45.1, 1.2] w=0.0154; TCP error 0.233 mm / 0.069 deg",
+      "seconds": 7.38
+    },
+    {
+      "state": "DESCEND",
+      "step": "tool_a into slot",
+      "ok": true,
+      "info": "34 pts, exec code 1; TCP error 0.005 mm / 0.000 deg",
+      "seconds": 3.91
+    },
+    {
+      "state": "RELEASE",
+      "step": "tool_a",
+      "ok": true,
+      "info": "tool_a back in slot, placement error 1.582 mm",
+      "seconds": 0.96
+    },
+    {
+      "state": "RETREAT",
+      "step": "clear of tool_a",
+      "ok": true,
+      "info": "34 pts, exec code 1; TCP error 0.101 mm / 0.058 deg",
+      "seconds": 3.92
+    },
+    {
+      "state": "APPROACH",
+      "step": "above tool_b",
+      "ok": true,
+      "info": "IK q(deg)=[76.5, 15.3, 35.2, 0.0, 39.4, 1.4] w=0.0101; TCP error 0.229 mm / 0.076 deg",
+      "seconds": 4.15
+    },
+    {
+      "state": "OPEN",
+      "step": "gripper open",
+      "ok": true,
+      "info": "jaw at 0.0140 m",
+      "seconds": 0.15
+    },
+    {
+      "state": "DESCEND",
+      "step": "onto tool_b",
+      "ok": true,
+      "info": "38 pts, exec code 1; TCP error 0.027 mm / 0.005 deg",
+      "seconds": 4.28
+    },
+    {
+      "state": "COUPLE",
+      "step": "tool_b",
+      "ok": true,
+      "info": "tool_b attached to ee_link; jaw at 0.0050 m",
+      "seconds": 0.86
+    },
+    {
+      "state": "RETREAT",
+      "step": "lift tool_b",
+      "ok": true,
+      "info": "38 pts, exec code 1; TCP error 0.082 mm / 0.040 deg",
+      "seconds": 4.31
+    },
+    {
+      "state": "HOME",
+      "step": "home",
+      "ok": true,
+      "info": "MoveGroup code 1; max joint error 0.051 deg",
+      "seconds": 7.12
+    }
+  ]
+}
