@@ -1,0 +1,7 @@
+*.sh text eol=lf
+.wslconfig text eol=lf
+*.STL binary
+*.stl binary
+*.SLDPRT binary
+*.SLDASM binary
+*.ar4 -text
