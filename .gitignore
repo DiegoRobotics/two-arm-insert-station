@@ -1,0 +1,6 @@
+~$*
+*.bak
+build/
+install/
+log/
+__pycache__/
