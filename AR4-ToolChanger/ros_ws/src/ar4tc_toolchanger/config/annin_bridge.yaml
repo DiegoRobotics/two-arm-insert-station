@@ -1,0 +1,18 @@
+# annin_bridge parameters (see docs/ANNIN_BRIDGE.md). Angles in degrees (Annin convention).
+annin_bridge:
+  ros__parameters:
+    baud: 9600                    # same as the HMI; Teensy USB serial ignores it
+    start_enabled: false          # motion gate; enable with the ~/enable service
+    max_joint_speed_deg_s: 20.0   # hard cap per joint; segments are slowed down to respect it
+    min_segment_seconds: 0.4
+    path_tolerance_deg: 0.2       # max deviation from the planned path when merging waypoints
+    start_tolerance_deg: 1.0      # trajectory start vs measured position
+    goal_tolerance_deg: 0.5       # final measured position vs target
+    limit_margin_deg: 1.0         # target must stay this far inside the firmware limits
+    max_travel_deg: 15.0          # refuse any trajectory moving a joint further than this (0 = off).
+                                  # Raise it for the tool-change run: ros2 param set /annin_bridge max_travel_deg 0.0
+    acc_pct: 20.0                 # RJ "Ac": % of each move used to accelerate
+    dcc_pct: 20.0                 # RJ "Dc": % of each move used to decelerate
+    ramp_pct: 20.0                # RJ "Rm": accel ramp amplitude (HMI "percentage")
+    poll_hz: 10.0                 # RP polling while idle
+    reply_timeout_s: 2.0

@@ -1,0 +1,7 @@
+# First real-robot dry run: same layout and sequence as toolchanger.yaml, but slower and with the
+# whole dock raised 100 mm (lowest coupling-face point ~200 mm above the robot base plane).
+extends: toolchanger.yaml
+velocity_scaling: 0.1
+acceleration_scaling: 0.1
+dock:
+  base: {center: [-0.28, -0.13, 0.105], size: [0.14, 0.34, 0.010]}
