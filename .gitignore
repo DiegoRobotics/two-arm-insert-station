@@ -1,0 +1,12 @@
+cat > .gitignore << 'EOF'
+build/
+install/
+log/
+__pycache__/
+*.pyc
+.vscode/
+src/external/
+*.bag
+*.db3
+*.mp4
+EOF
