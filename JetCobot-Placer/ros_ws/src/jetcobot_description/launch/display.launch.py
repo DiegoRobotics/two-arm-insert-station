@@ -6,7 +6,6 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
   ld = LaunchDescription()
 
-  default_urdf_path = FindPackageShare('jetcobot_description')
   default_model_path = PathJoinSubstitution(['urdf', 'jetcobot.urdf'])
 
   # These parameters are maintained for backwards compatibility
@@ -16,7 +15,7 @@ def generate_launch_description():
 
   # This parameter has changed its meaning slightly from previous versions
   ld.add_action(DeclareLaunchArgument(name='model', default_value=default_model_path,
-                                      description='Path to robot urdf file relative to omnicar_description package'))
+                                      description='Path to robot urdf file relative to jetcobot_description package'))
 
   ld.add_action(IncludeLaunchDescription(
     PathJoinSubstitution([FindPackageShare('urdf_launch'), 'launch', 'display.launch.py']),
