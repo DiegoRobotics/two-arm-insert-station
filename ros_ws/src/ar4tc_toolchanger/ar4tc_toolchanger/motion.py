@@ -16,6 +16,21 @@ from sensor_msgs.msg import JointState
 SUCCESS = MoveItErrorCodes.SUCCESS
 
 
+def slow_down(traj, vel_scale, acc_scale):
+    """Uniformly stretch a timed JointTrajectory in place so it respects velocity/acceleration scaling.
+
+    Humble's /compute_cartesian_path has no scaling fields and times the path at 100 %. Stretching time
+    by k divides velocities by k and accelerations by k^2, so k = max(1/vel, 1/sqrt(acc)) is enough.
+    """
+    k = max(1.0, 1.0 / max(vel_scale, 1e-3), 1.0 / np.sqrt(max(acc_scale, 1e-6)))
+    for p in traj.points:
+        ns = round((p.time_from_start.sec * 1e9 + p.time_from_start.nanosec) * k)
+        p.time_from_start.sec, p.time_from_start.nanosec = int(ns // 1_000_000_000), int(ns % 1_000_000_000)
+        p.velocities = [v / k for v in p.velocities]
+        p.accelerations = [a / k ** 2 for a in p.accelerations]
+    return k
+
+
 def se3_to_pose(M: pin.SE3) -> Pose:
     p = Pose()
     p.position.x, p.position.y, p.position.z = (float(v) for v in M.translation)
@@ -137,6 +152,8 @@ class MoveItClient:
         pts = res.solution.joint_trajectory.points
         if not pts or (pts[-1].time_from_start.sec == 0 and pts[-1].time_from_start.nanosec == 0):
             return False, "cartesian path not time-parameterized"
+        if not hasattr(req, "max_velocity_scaling_factor"):   # Humble: service timed it at full speed
+            slow_down(res.solution.joint_trajectory, self.vel, self.acc)
         g = ExecuteTrajectory.Goal(trajectory=res.solution)
         self.last_trajectory = res.solution.joint_trajectory
         out = self._action(self.exec_ac, g, 60.0)

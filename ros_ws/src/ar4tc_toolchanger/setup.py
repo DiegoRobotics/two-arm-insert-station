@@ -28,6 +28,8 @@ setup(
         "console_scripts": [
             "toolchange_demo = ar4tc_toolchanger.toolchange_demo:main",
             "goto_pose = ar4tc_toolchanger.goto_pose:main",
+            "goto_pose_hmi = ar4tc_toolchanger.goto_pose_hmi:main",
+            "hold_joints_hmi = ar4tc_toolchanger.hold_joints_hmi:main",
             "ik_benchmark = ar4tc_toolchanger.ik_benchmark:main",
             "annin_bridge = ar4tc_toolchanger.annin_bridge:main",
             "annin_emulator = ar4tc_toolchanger.annin_emulator:main",

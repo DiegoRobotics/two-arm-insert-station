@@ -1,7 +1,7 @@
 """MK3 + MoveIt + RViz with a selectable backend and IK solver.
 
   mode:=mock       ros2_control mock hardware (default)
-  mode:=gazebo     Gazebo Harmonic physics (upstream annin_ar4_gazebo)
+  mode:=gazebo     Gazebo physics (upstream annin_ar4_gazebo: Harmonic on Jazzy, Ignition Fortress on Humble)
   mode:=annin      REAL ROBOT through annin_bridge -> unchanged Annin v6.0 firmware (serial_port:=/dev/ttyACM0)
   mode:=annin_emu  annin_bridge -> firmware emulator on a pseudo-terminal (no hardware)
   ik:=kdl|pick_ik
@@ -16,7 +16,7 @@ import os
 import yaml
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, OpaqueFunction, SetEnvironmentVariable
 from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.parameter_descriptions import ParameterFile, ParameterValue
@@ -64,9 +64,14 @@ def _setup(context):
     kinematics = {"robot_description_kinematics": _yaml("ar4tc_toolchanger", f"config/kinematics_{a['ik']}.yaml")}
     joint_limits = ParameterFile(PathJoinSubstitution(
         [FindPackageShare("annin_ar4_moveit_config"), "config/joint_limits.yaml"]), allow_substs=True)
-    planning = {"default_planning_pipeline": "ompl", "planning_pipelines": ["ompl", "pilz"],
-                "ompl": _yaml("annin_ar4_moveit_config", "config/ompl_planning.yaml"),
-                "pilz": _yaml("annin_ar4_moveit_config", "config/pilz_planning.yaml")}
+    # Planner YAML comes from the upstream driver branch matching the distro (main = Jazzy syntax,
+    # humble = Humble syntax). The humble branch ships no Pilz config; nothing of ours uses Pilz.
+    planning = {"default_planning_pipeline": "ompl", "planning_pipelines": ["ompl"],
+                "ompl": _yaml("annin_ar4_moveit_config", "config/ompl_planning.yaml")}
+    if os.path.exists(os.path.join(get_package_share_directory("annin_ar4_moveit_config"),
+                                   "config", "pilz_planning.yaml")):
+        planning["planning_pipelines"].append("pilz")
+        planning["pilz"] = _yaml("annin_ar4_moveit_config", "config/pilz_planning.yaml")
     if gazebo:
         controllers = ParameterFile(PathJoinSubstitution(
             [FindPackageShare("annin_ar4_moveit_config"), "config/controllers.yaml"]), allow_substs=True)
@@ -101,6 +106,10 @@ def _setup(context):
         nodes += [Node(package="controller_manager", executable="spawner", arguments=[c, "-c", "/controller_manager"])
                   for c in ("joint_state_broadcaster", "joint_trajectory_controller")]
     elif mode == "gazebo":
+        # Humble/Fortress on WSLg: the Ogre-2 GUI aborts (GL3PlusTextureGpu::copyTo unimplemented on the
+        # d3d12 GL driver) and takes the server and controllers down with it. Mesa software GL avoids it.
+        if os.environ.get("ROS_DISTRO") == "humble" and "LIBGL_ALWAYS_SOFTWARE" not in os.environ:
+            nodes.append(SetEnvironmentVariable("LIBGL_ALWAYS_SOFTWARE", "1"))
         nodes.append(IncludeLaunchDescription(
             PathJoinSubstitution([FindPackageShare("annin_ar4_gazebo"), "launch", "gazebo.launch.py"]),
             launch_arguments={"ar_model": model}.items()))
