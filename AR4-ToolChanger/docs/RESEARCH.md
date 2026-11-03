@@ -33,6 +33,7 @@ Ekumen's `ar4_description` and `ar4_hardware_interface` say they are derived fro
 - Gripper: Annin servo gripper. The user is open to a simpler or better design for the tool-changer tools.
 - CAD: SolidWorks 2026 Student Edition.
 - No GitHub. A local git repo lives in `AR4 MK3 Engiworks Gael/AR4-ToolChanger`.
+  (Since 2026-11-03 the project lives in `AR4-ToolChanger/` of the `two-arm-insert-station` GitHub repo, with this history kept.)
 
 ## Decisions (approved 2026-10-21)
 

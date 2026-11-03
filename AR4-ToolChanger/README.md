@@ -5,9 +5,10 @@ Status: **Phase 1 done; Phase 2 milestone met; first simulated tool-change seque
 
 Docs: [HMI EXPORT](docs/HMI_EXPORT.md) · [TOOL-CHANGE SIM PROCEDURE](docs/TOOLCHANGE_SIM_PROCEDURE.md) · [REAL ROBOT](docs/REAL_ROBOT.md) · [ANNIN BRIDGE](docs/ANNIN_BRIDGE.md) · [RESEARCH](docs/RESEARCH.md) · [ARCHITECTURE](docs/ARCHITECTURE.md) · [KINEMATICS](docs/KINEMATICS.md) · [ROADMAP](docs/ROADMAP.md) · [TROUBLESHOOTING](docs/TROUBLESHOOTING.md)
 
-## Quick start (Ubuntu app)
+## Quick start (Ubuntu / WSL)
+Paths below are relative to the root of the `two-arm-insert-station` repo.
 ```bash
-bash "/mnt/c/Users/gael1/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/setup/build.sh"
+bash AR4-ToolChanger/setup/build.sh                  # from the repo root
 ros2 launch ar4tc_toolchanger toolchange_demo.launch.py          # simulate the tool change in RViz
 ros2 run ar4tc_toolchanger export_hmi -o "<path>/My program.ar4"  # then: hmi_check "<path>/My program.ar4"
 ```
@@ -21,7 +22,7 @@ Optional: drive the robot from ROS through `annin_bridge` (`mode:=annin`, emulat
 
 ## Layout
 ```
-AR4-ToolChanger/        (this folder, Documents, git)  docs, setup scripts, ros_ws/src source, CAD exports later
+AR4-ToolChanger/        (this folder, in two-arm-insert-station)  docs, setup scripts, ros_ws/src source, CAD exports later
 ~/ar4tc_ws              (inside WSL, ext4)            build copy (setup/build.sh rsyncs ros_ws/src here)
 ~/ar4tc_reports         (inside WSL)                  JSON report per tool-change run
 ```
@@ -32,7 +33,7 @@ AR4-ToolChanger/        (this folder, Documents, git)  docs, setup scripts, ros_
    On this PC, the default user `gael` was created by script (`/etc/wsl.conf`: systemd on, default user gael).
 3. In Ubuntu:
    ```bash
-   bash "/mnt/c/Users/gael1/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/setup/setup_wsl_ros.sh"
+   bash <repo>/AR4-ToolChanger/setup/setup_wsl_ros.sh
    ```
    Takes about 30–60 min and 10–15 GB.
 4. Smoke test: `ros2 launch annin_ar4_moveit_config moveit.launch.py ar_model:=mk3 include_gripper:=True` should open RViz with the MK3. Drag the end-effector, then click Plan & Execute.

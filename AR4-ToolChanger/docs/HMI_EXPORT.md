@@ -44,8 +44,8 @@ Proof that it catches mistakes (2026-10-22):
 ```bash
 ros2 launch ar4tc_toolchanger bringup.launch.py                      # simulation + RViz
 ros2 run ar4tc_toolchanger toolchange_demo                           # 2nd window: run the sequence (config: toolchanger.yaml)
-ros2 run ar4tc_toolchanger export_hmi -o "/mnt/c/Users/gael1/OneDrive/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/hmi_programs/My program.ar4"
-ros2 run ar4tc_toolchanger hmi_check "/mnt/c/…/hmi_programs/My program.ar4" --speedup 4   # must print RESULT: PASS
+ros2 run ar4tc_toolchanger export_hmi -o "<repo>/AR4-ToolChanger/hmi_programs/My program.ar4"
+ros2 run ar4tc_toolchanger hmi_check "<repo>/AR4-ToolChanger/hmi_programs/My program.ar4" --speedup 4   # must print RESULT: PASS
 ```
 Change the layout, tools or sequence in `config/toolchanger.yaml` (or a file with `extends: toolchanger.yaml`), rebuild (`setup/build.sh`), and repeat. Pass another config with `toolchange_demo myconfig.yaml`.
 

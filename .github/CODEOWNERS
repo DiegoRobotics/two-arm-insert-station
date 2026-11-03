@@ -1,5 +1,6 @@
 # Patterns without a leading slash match at any depth.
 /JetCobot-Placer/           @DiegoRobotics
+/AR4-ToolChanger/           @gv-34
 ar4_tasks/                  @gv-34
 /Workcell/                  @DiegoRobotics @gv-34
 cell_coordinator/           @DiegoRobotics @gv-34
