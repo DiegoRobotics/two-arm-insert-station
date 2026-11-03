@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Upstream arm SRDF (groups, home state, collision pairs) + pairs for the tool-changer master. -->
+<robot xmlns:xacro="http://wiki.ros.org/xacro" name="mk3">
+  <xacro:include filename="$(find annin_ar4_moveit_config)/srdf/ar_macro.srdf.xacro"/>
+  <xacro:ar_srdf tf_prefix=""/>
+  <disable_collisions link1="tc_master" link2="link_6" reason="Adjacent"/>
+  <disable_collisions link1="tc_master" link2="link_5" reason="Never"/>
+</robot>
