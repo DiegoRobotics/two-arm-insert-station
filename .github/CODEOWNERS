@@ -1,4 +1,5 @@
-/src/cobot_tasks/      @DiegoRobotics
-/src/ar4_tasks/        @gv-34
-/src/workcell_description/  @DiegoRobotics @gv-34
-/src/cell_coordinator/      @DiegoRobotics @gv-34
+# Patterns without a leading slash match at any depth.
+/JetCobot-Placer/           @DiegoRobotics
+ar4_tasks/                  @gv-34
+/Workcell/                  @DiegoRobotics @gv-34
+cell_coordinator/           @DiegoRobotics @gv-34

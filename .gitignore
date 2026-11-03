@@ -4,7 +4,7 @@ log/
 __pycache__/
 *.pyc
 .vscode/
-src/external/
+**/src/external/
 *.bag
 *.db3
 *.mp4
