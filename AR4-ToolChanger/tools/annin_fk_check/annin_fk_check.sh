@@ -3,7 +3,8 @@
 # Compiles a COPY of Annin's source into ~/annin_kin; the Annin folder is only read.
 # Needs: python3-pybind11 (sudo apt install python3-pybind11) and the built ar4tc workspace.
 set -eo pipefail
-ANNIN="/mnt/c/Users/gael1/Documents/AR4 MK3 Engiworks Gael/6.0/AR4-MK3-HMI-interface-6.0-exe/AR4-MK3 HMI interface 6.0 exe"
+# Point ANNIN_HMI_DIR at your Annin HMI 6.0 folder (the one with kinematics.cpp).
+ANNIN="${ANNIN_HMI_DIR:?set ANNIN_HMI_DIR to the Annin HMI 6.0 folder containing kinematics.cpp}"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 mkdir -p ~/annin_kin
 cp "$ANNIN/kinematics.cpp" "$ANNIN/bindings.cpp" ~/annin_kin/

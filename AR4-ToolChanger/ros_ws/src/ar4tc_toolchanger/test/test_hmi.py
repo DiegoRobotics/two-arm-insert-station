@@ -8,7 +8,8 @@ from ar4tc_toolchanger import annin_kinematics as ak
 from ar4tc_toolchanger import hmi_program as hp
 from ar4tc_toolchanger.export_hmi import build_lines
 
-HMI_DIR = "/mnt/c/Users/gael1/OneDrive/Documents/AR4 MK3 Engiworks Gael/6.0/AR4-MK3-HMI-interface-6.0-exe/AR4-MK3 HMI interface 6.0 exe"
+# Annin HMI 6.0 folder with Home.ar4 etc.; tests that need it skip when unset.
+HMI_DIR = os.environ.get("ANNIN_HMI_DIR", "")
 
 
 @pytest.mark.parametrize("q,xyz", [

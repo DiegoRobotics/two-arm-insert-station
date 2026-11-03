@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Copy project packages from Windows (source of truth, in git) into the WSL workspace, build, and test.
+# Copy project packages from this repo (source of truth, in git) into the WSL workspace, build, and test.
 # Works on Jazzy (Ubuntu 24.04) and Humble (Ubuntu 22.04): the installed distro is detected.
-# Run inside Ubuntu:  bash "/mnt/c/Users/gael1/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/setup/build.sh"
+# Run inside Ubuntu:  bash <repo>/AR4-ToolChanger/setup/build.sh
 set -eo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WS=~/ar4tc_ws

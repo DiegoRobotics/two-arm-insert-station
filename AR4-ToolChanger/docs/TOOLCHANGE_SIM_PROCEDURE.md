@@ -26,7 +26,7 @@ Goal: in simulation, the MK3 goes HOME → picks **tool_a** → HOME → returns
 ## 1. Run it
 In the **Ubuntu** app:
 ```bash
-bash "/mnt/c/Users/gael1/OneDrive/Documents/AR4 MK3 Engiworks Gael/AR4-ToolChanger/setup/build.sh"   # sync + build + tests
+bash <repo>/AR4-ToolChanger/setup/build.sh   # sync + build + tests
 ros2 launch ar4tc_toolchanger toolchange_demo.launch.py          # RViz opens; the sequence starts by itself
 ```
 Other commands (start the sim first with `ros2 launch ar4tc_toolchanger toolchange_demo.launch.py run:=false`):
