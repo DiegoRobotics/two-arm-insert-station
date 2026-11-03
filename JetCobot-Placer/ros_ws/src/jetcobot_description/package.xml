@@ -3,12 +3,13 @@
 <package format="3">
   <name>jetcobot_description</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="jetson@todo.todo">jetson</maintainer>
-  <license>TODO: License declaration</license>
+  <description>URDF and meshes for the Yahboom JetCobot (myCobot 280), copied from the Yahboom image</description>
+  <maintainer email="186503994+DiegoRobotics@users.noreply.github.com">DiegoRobotics</maintainer>
+  <license>Unknown (Yahboom, undeclared; see ORIGIN.md)</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <exec_depend>launch_ros</exec_depend>
   <exec_depend>urdf_launch</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
