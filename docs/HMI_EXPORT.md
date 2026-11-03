@@ -71,3 +71,16 @@ The output is ordinary HMI code. You can add `Cam On`, `Vis Find …`, `Move Vis
 - Simulation only so far: no physical run. Geometry (dock, tools, master 20 mm, TCPs) is placeholder until CAD.
 - Joint-linear `Move R` steps stop briefly between points (4 short stops per docking move). That's fine for docking, but `Move L` would be smoother. It wasn't used because it depends on the HMI's tool frame and its 7 mm model difference.
 - `Sp` timing on the real robot isn't the same as in the simulation; only the path is reproduced.
+
+## 8. goto_pose on the real robot with held joints (`goto_pose_hmi`, 2026-10-28)
+For testing the arm while J5/J6 are unreliable. `python3 -m ar4tc_toolchanger.goto_pose_hmi X Y Z --start J1..J6 -o "<file>.ar4"` (run from `ros_ws/src/ar4tc_toolchanger`, no ROS needed).
+- Target = flange X Y Z in **HMI coordinates** (mm, tool frame 0: what the HMI display shows). IK runs on Annin's own kinematics, so there's no 7 mm URDF offset and no J1 sign conversion.
+- J4, J5, J6 are held by default (`--hold`). They're written with exactly the `--start` values in every line; the tool checks that the firmware's angle→step formula (`int((angle + limNeg) * stepDeg)`) then gives a step difference of 0.
+- Position only: the tool tilt follows from J2/J3 and is printed.
+- Refuses: unreachable targets, targets within 1° of a limit, travel > `--max-travel` (30°), any elbow/wrist/flange frame below `--min-z` (150 mm) along the joint-linear path.
+- Program: start pose → target (`Sp 10`) → `Wait Time` → back to start. **Only valid if the HMI shows exactly the `--start` angles**, otherwise held joints would move to them.
+- Not checked: collisions with objects around the robot (none modelled in HMI coordinates); not replayed with `hmi_check`.
+
+## 9. Tool-change loop with held joints (`hold_joints_hmi`, 2026-10-28)
+`python3 -m ar4tc_toolchanger.hold_joints_hmi "<exported>.ar4" --start J1..J6 --loop -o "<out>.ar4"` converts an exported tool-change program: every Move R target becomes its flange position and is re-solved with J1–J3 (`goto_pose_hmi.solve`); straight docking moves (Sp 10) are split every 10 mm. `Out` lines are dropped and each COUPLE/RELEASE becomes a comment + `Wait Time`. `--loop` wraps it in `Tab Number 1` … `Jump Tab-1` (syntax from Annin's `Stack Blocks.ar4`), so it runs until stopped in the HMI.
+Result for the raised-dock program: 30 → 93 Move R lines; flange exactly at the source dock positions; J1 0…−76.5°, J2 0…32.4°, J3 0…30.8°. **Without J5 the tool can't stay vertical: it's tilted 49° (tool_a) and 57° (tool_b) from straight down at the docks, so this is a motion dry run only: no dock, no tools, no real coupling.**

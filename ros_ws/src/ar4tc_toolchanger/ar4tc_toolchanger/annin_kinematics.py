@@ -26,12 +26,18 @@ def _t(x=0.0, z=0.0):
     return T
 
 
-def fk(q_annin_deg):
-    """Flange pose (4x4, mm) for Annin joint angles in degrees."""
-    T = np.eye(4)
+def frames(q_annin_deg):
+    """Poses (4x4, mm) of DH frames 1..6 for Annin joint angles in degrees; the last one is the flange."""
+    T, out = np.eye(4), []
     for i, q in enumerate(q_annin_deg):
         T = T @ _rx(np.radians(ALPHA[i])) @ _t(x=A[i]) @ _rz(np.radians(THETA[i] + q)) @ _t(z=D[i])
-    return T
+        out.append(T)
+    return out
+
+
+def fk(q_annin_deg):
+    """Flange pose (4x4, mm) for Annin joint angles in degrees."""
+    return frames(q_annin_deg)[-1]
 
 
 def xyz(q_annin_deg):
