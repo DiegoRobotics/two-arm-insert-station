@@ -22,7 +22,7 @@ setup(
     maintainer="gael",
     maintainer_email="gael10838@gmail.com",
     description="AR4 MK3 simulated tool changer",
-    license="MIT",
+    license="Apache-2.0",
     tests_require=["pytest"],
     entry_points={
         "console_scripts": [
