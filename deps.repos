@@ -1,7 +1,9 @@
-# AR4 driver. Branch must match the ROS distro of the machine running the AR4:
-#   humble -> "humble", jazzy -> "main"
+# AR4 driver, pinned to the same commit as AR4-ToolChanger/setup/setup_wsl_ros_humble.sh.
+# The commit must match the ROS distro of the machine running the AR4:
+#   humble -> b9adb2a65be5d4bc7c7f5e25c421238528aeeae5 ("humble" branch)
+#   jazzy  -> 4b88db1c924515f7ce343105d46a637ecf2d7659 ("main" branch, setup_wsl_ros.sh)
 repositories:
   external/ar4_ros_driver:
     type: git
     url: https://github.com/ycheng517/ar4_ros_driver.git
-    version: humble
+    version: b9adb2a65be5d4bc7c7f5e25c421238528aeeae5

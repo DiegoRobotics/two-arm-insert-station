@@ -1,0 +1,73 @@
+# Tool-change simulation config. Units: m, rad (except where noted). Frame: base_link.
+# The MK3 faces -Y at J1 = 0; the dock is on the robot's right (-X). All geometry is placeholder until CAD.
+base_frame: base_link
+group: ar_manipulator
+tip_link: ee_link                     # IK tip (flange)
+arm_joints: [joint_1, joint_2, joint_3, joint_4, joint_5, joint_6]
+trajectory_action: /joint_trajectory_controller/follow_joint_trajectory
+velocity_scaling: 0.3
+acceleration_scaling: 0.3
+home: [0.0, 0.0, 0.0, 0.0, 1.5708, 0.0]  # = HMI Home.ar4 (J5 90: flange down, away from the J5 = 0 singularity)
+
+# Tool-changer master on the flange (must match urdf/ar4tc.urdf.xacro args)
+master: {radius: 0.025, length: 0.020}
+mating_offset: [0.0, 0.0, 0.020]      # ee_link -> tc_mating (coupling face)
+touch_links: [link_6, ee_link, tc_master]
+
+approach_height: 0.12                 # pre-dock height of the coupling face above the docked pose
+dock_gap: 0.001                       # stop 1 mm before contact, so collision checking stays ON while docking
+
+tolerances:
+  pos_mm: 1.0
+  rot_deg: 0.5
+  min_manipulability: 1.0e-4
+  home_joint_deg: 0.5
+  place_mm: 2.0
+
+dock:
+  base: {center: [-0.28, -0.13, 0.005], size: [0.14, 0.34, 0.010]}
+  post: {width: 0.010, depth: 0.040, clearance: 0.004}  # cradle posts each side of the tool body
+  float: 0.001                        # docked tool plate rests this far above the posts (no contact in the model)
+
+# Tool geometry in the tool frame: origin = top centre of the coupling plate, +z down into the tool
+# (same as tc_mating when coupled). tcp = tool centre point from the coupling face.
+tools:
+  tool_a:
+    label: Gripper tool
+    slot_xy: [-0.28, -0.20]
+    plate: [0.050, 0.050, 0.008]
+    body: {type: box, size: [0.030, 0.030, 0.050]}
+    fingers: {size: [0.008, 0.020, 0.025], spacing: 0.016}
+    tcp: [0.0, 0.0, 0.083]
+    mass_kg: 0.30                     # placeholder
+    color: [0.95, 0.55, 0.10, 1.0]
+  tool_b:
+    label: Generic tool (probe)
+    slot_xy: [-0.28, -0.06]
+    plate: [0.050, 0.050, 0.008]
+    body: {type: cylinder, radius: 0.012, length: 0.060}
+    tip: {radius: 0.003, length: 0.015}
+    tcp: [0.0, 0.0, 0.083]
+    mass_kg: 0.20                     # placeholder
+    color: [0.15, 0.55, 0.95, 1.0]
+
+# Steps: home | {pick: tool} | {place: tool}
+sequence:
+  - home
+  - {pick: tool_a}
+  - home
+  - {place: tool_a}
+  - {pick: tool_b}
+  - home
+
+# HMI 6.0 export (export_hmi). Speeds are HMI % values.
+hmi:
+  speed_free: 25
+  speed_dock: 10
+  acc: 20
+  dcc: 20
+  ramp: 100
+  path_tolerance_deg: 0.2             # max deviation from the simulated path when reducing to Move R points
+  lock_output: 8                      # Arduino IO output driving the tool lock (placeholder, set to your wiring)
+  lock_on_is_locked: true             # Out On = lock, Out Off = release
+  lock_wait_s: 0.5
