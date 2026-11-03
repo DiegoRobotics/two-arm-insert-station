@@ -55,11 +55,12 @@ cd <workspace>            # e.g. a ros_ws folder
 vcs import src < <repo-root>/deps.repos
 ```
 
-The AR4 driver branch in `deps.repos` must match the ROS distro of the
-machine running the AR4 (`humble` for Humble, `main` for Jazzy).
+`deps.repos` pins the AR4 driver to the same commit as
+`AR4-ToolChanger/setup/setup_wsl_ros_humble.sh` (`b9adb2a`, `humble` branch).
+For Jazzy use `4b88db1` (`main` branch), as in `setup_wsl_ros.sh`; keep the two
+files in sync when bumping.
 
 ## License
 
-Apache-2.0 (see `LICENSE`), except:
-- `jetcobot_description`: Yahboom's files, no declared license.
-- `ar4tc_toolchanger`: its `package.xml` declares MIT.
+Apache-2.0 (see `LICENSE`), except `jetcobot_description`, whose files are
+Yahboom's and carry no declared license.
