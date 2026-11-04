@@ -7,38 +7,38 @@
 
 <!-- ===================== Properties (edit these) ===================== -->
 
-<!-- Base plate -->
-<xacro:property name="plate_x" value="1.0"/>
-<xacro:property name="plate_y" value="0.7"/>
+<!-- Base plate: real plate is 28 x 20 in -->
+<xacro:property name="plate_x" value="0.7112"/>
+<xacro:property name="plate_y" value="0.508"/>
 <xacro:property name="plate_t" value="0.012"/>   <!-- thickness -->
 
 <!-- Robot positions (center of each robot's footprint) -->
-<xacro:property name="ar4_x"   value="-0.3"/>
+<xacro:property name="ar4_x"   value="-0.2032"/>
 <xacro:property name="ar4_y"   value="0.0"/>
 <xacro:property name="ar4_zone_size" value="0.26"/>
 
-<xacro:property name="cobot_x" value="0.3"/>
+<xacro:property name="cobot_x" value="0.2413"/>
 <xacro:property name="cobot_y" value="0.0"/>
 <xacro:property name="cobot_yaw" value="${pi}"/>  <!-- faces the AR4 -->
 <xacro:property name="cobot_zone_size" value="0.18"/>
 
 <!-- Insert fixture: holds the part. Cobot places, AR4 presses. -->
-<xacro:property name="fixture_x" value="0.1"/>
+<xacro:property name="fixture_x" value="0.0635"/>
 <xacro:property name="fixture_y" value="0.0"/>
 <xacro:property name="fixture_size_x" value="0.12"/>
 <xacro:property name="fixture_size_y" value="0.08"/>
 <xacro:property name="fixture_size_z" value="0.03"/>
 
 <!-- Insert tray: cobot picks inserts here. -->
-<xacro:property name="tray_x" value="0.3"/>
-<xacro:property name="tray_y" value="-0.2"/>
+<xacro:property name="tray_x" value="0.2413"/>
+<xacro:property name="tray_y" value="-0.1778"/>
 <xacro:property name="tray_size_x" value="0.1"/>
 <xacro:property name="tray_size_y" value="0.06"/>
 <xacro:property name="tray_size_z" value="0.015"/>
 
 <!-- Tool changer dock (AR4 only). Slots are spaced along X. -->
-<xacro:property name="dock_x" value="-0.3"/>
-<xacro:property name="dock_y" value="0.25"/>
+<xacro:property name="dock_x" value="-0.2032"/>
+<xacro:property name="dock_y" value="0.1905"/>
 <xacro:property name="dock_size_x" value="0.2"/>
 <xacro:property name="dock_size_y" value="0.06"/>
 <xacro:property name="dock_size_z" value="0.1"/>
