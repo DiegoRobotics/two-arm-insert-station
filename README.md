@@ -12,7 +12,7 @@ Two-arm heat-set insert station: a Yahboom JetCobot (myCobot 280) handles placem
 | `AR4-ToolChanger/ros_ws/src/ar4tc_toolchanger/` | Tool-changer ROS 2 package (Python, `ament_python`) |
 | `deps.repos` | External repositories (AR4 driver) to import with `vcs` |
 
-## Prerequisites
+## Pre-requisites
 
 - Ubuntu 22.04 with ROS 2 Humble
 - `python3-colcon-common-extensions`, `python3-rosdep`, `python3-vcstool`
