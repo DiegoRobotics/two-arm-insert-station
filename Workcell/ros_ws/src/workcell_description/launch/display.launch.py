@@ -1,5 +1,6 @@
 import os
 
+import xacro
 from launch import LaunchDescription
 from launch_ros.actions import Node
 from ament_index_python.packages import get_package_share_directory
@@ -8,10 +9,9 @@ from ament_index_python.packages import get_package_share_directory
 def generate_launch_description():
     pkg_share = get_package_share_directory('workcell_description')
 
-    # Read the URDF contents (robot_state_publisher wants the text, not the path)
-    urdf_file_path = os.path.join(pkg_share, 'urdf', 'workcell.urdf')
-    with open(urdf_file_path, 'r') as f:
-        robot_description = f.read()
+    # Expand the xacro into plain URDF text (robot_state_publisher wants the text, not the path)
+    xacro_file_path = os.path.join(pkg_share, 'urdf', 'workcell.urdf.xacro')
+    robot_description = xacro.process_file(xacro_file_path).toxml()
 
     # Create a Node action to launch the robot_state_publisher
     robot_state_publisher_node = Node(
