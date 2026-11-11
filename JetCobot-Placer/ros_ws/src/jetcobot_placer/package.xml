@@ -8,6 +8,12 @@
   <license>Apache-2.0</license>
 
   <depend>rclpy</depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>jetcobot_description</exec_depend>
+  <exec_depend>usb_cam</exec_depend>
+  <!-- pymycobot is installed with pip, see README -->
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
