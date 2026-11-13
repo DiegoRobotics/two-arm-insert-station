@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+<!-- AR4 (MK2) as a STATIC obstacle: every joint is fixed at a given angle.
+
+     Link frames, joint origins and the link_1..link_6 meshes come from
+     annin_ar4_description/urdf/ar_macro.xacro (ar4_ros_driver, MIT License,
+     Copyright (c) 2021 Dexter Ong), pinned to commit 4b88db1 (jazzy).
+
+     Changes from upstream:
+     - the base_link mesh is replaced by ar4_j1_turret.stl: the base enclosure
+       and the J1 motor in its tail are removed, as in the SolidWorks layout
+       (the enclosure will be mounted somewhere else);
+     - each revolute joint is split into two fixed joints: the upstream origin,
+       then a rotation about the upstream axis by the joint angle. Nothing
+       moves, so no joint_states are needed for the AR4.
+
+     Joint angles are in degrees, same signs as the SolidWorks model
+     (checked by forward kinematics: [0, 55, 52, 0, -17, 0] puts the tool
+     straight down over the table, within ~11 mm of the CAD flange). -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="wc_ar4_silver"><color rgba="0.75 0.75 0.78 1"/></material>
+
+  <!-- One AR4 link with the same mesh for visual and collision. -->
+  <xacro:macro name="ar4_link" params="name mesh">
+    <link name="${name}">
+      <visual>
+        <geometry><mesh filename="${mesh}"/></geometry>
+        <material name="wc_ar4_silver"/>
+      </visual>
+      <collision>
+        <geometry><mesh filename="${mesh}"/></geometry>
+      </collision>
+    </link>
+  </xacro:macro>
+
+  <!-- A "frozen" revolute joint: upstream origin (xyz, rpy) into an empty
+       frame, then a rotation by the joint angle about the joint axis
+       (angle_rpy is that rotation written as roll/pitch/yaw). -->
+  <xacro:macro name="ar4_frozen_joint" params="n parent child xyz rpy angle_rpy">
+    <link name="${child}_zero"/>
+    <joint name="${child}_zero_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${child}_zero"/>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+    </joint>
+    <joint name="ar4_joint_${n}" type="fixed">
+      <parent link="${child}_zero"/>
+      <child link="${child}"/>
+      <origin xyz="0 0 0" rpy="${angle_rpy}"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- parent: link the AR4 base sits on. xyz/yaw: base_link origin
+       (= bottom of the hidden enclosure, on the J1 axis). j1..j6: degrees. -->
+  <xacro:macro name="ar4_static" params="parent xyz yaw j1 j2 j3 j4 j5 j6">
+    <xacro:property name="m" value="package://annin_ar4_description/meshes/ar4"/>
+    <xacro:property name="d" value="${pi/180}"/>
+
+    <joint name="ar4_base_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="ar4_base_link"/>
+      <origin xyz="${xyz}" rpy="0 0 ${yaw}"/>
+    </joint>
+    <xacro:ar4_link name="ar4_base_link"
+        mesh="package://workcell_description/meshes/vial_inspection/ar4_j1_turret.stl"/>
+
+    <!-- upstream axes: J1 +z, J2..J4 -z, J5 +x, J6 +z -->
+    <xacro:ar4_frozen_joint n="1" parent="ar4_base_link" child="ar4_link_1"
+        xyz="0 0 0" rpy="${pi} 0 0" angle_rpy="0 0 ${j1*d}"/>
+    <xacro:ar4_link name="ar4_link_1" mesh="${m}/link_1.STL"/>
+
+    <xacro:ar4_frozen_joint n="2" parent="ar4_link_1" child="ar4_link_2"
+        xyz="0 0.0642 -0.16977" rpy="1.5708 0 -1.5708" angle_rpy="0 0 ${-j2*d}"/>
+    <xacro:ar4_link name="ar4_link_2" mesh="${m}/link_2.STL"/>
+
+    <xacro:ar4_frozen_joint n="3" parent="ar4_link_2" child="ar4_link_3"
+        xyz="0 -0.305 0.007" rpy="0 0 3.1416" angle_rpy="0 0 ${-j3*d}"/>
+    <xacro:ar4_link name="ar4_link_3" mesh="${m}/link_3.STL"/>
+
+    <xacro:ar4_frozen_joint n="4" parent="ar4_link_3" child="ar4_link_4"
+        xyz="0 0 0" rpy="1.5708 0 -1.5708" angle_rpy="0 0 ${-j4*d}"/>
+    <xacro:ar4_link name="ar4_link_4" mesh="${m}/link_4.STL"/>
+
+    <xacro:ar4_frozen_joint n="5" parent="ar4_link_4" child="ar4_link_5"
+        xyz="0 0 -0.22263" rpy="${pi} 0 -1.5708" angle_rpy="${j5*d} 0 0"/>
+    <xacro:ar4_link name="ar4_link_5" mesh="${m}/link_5.STL"/>
+
+    <xacro:ar4_frozen_joint n="6" parent="ar4_link_5" child="ar4_link_6"
+        xyz="0 0 0.03625" rpy="0 0 3.1416" angle_rpy="0 0 ${j6*d}"/>
+    <xacro:ar4_link name="ar4_link_6" mesh="${m}/link_6.STL"/>
+
+    <!-- centre of the tool mounting face -->
+    <link name="ar4_ee_link"/>
+    <joint name="ar4_ee_joint" type="fixed">
+      <parent link="ar4_link_6"/>
+      <child link="ar4_ee_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

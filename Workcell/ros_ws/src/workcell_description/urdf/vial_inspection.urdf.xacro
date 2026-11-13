@@ -1,0 +1,104 @@
+<?xml version="1.0"?>
+<robot name="vial_inspection_cell" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<!-- Vial inspection workcell: SolidWorks Layout_V3, configuration "Vial_Inspection"
+     (handoff 2026-11-13). Not the final layout.
+
+     world frame = SolidWorks layout frame:
+       origin = front-left corner of the table plate, at its BOTTOM face
+       +X along the long edge (right), +Y to the back, +Z up
+       => the plate top is at Z = 0.00635, and every handoff number applies as-is (mm -> m).
+
+     The static meshes in meshes/vial_inspection/ were exported already in this
+     frame (mm), so each one sits on `world` at origin 0 with scale 0.001.
+
+     Needs these packages built and sourced:
+       jetcobot_description   (JetCobot-Placer/ros_ws)
+       annin_ar4_description  (ar4_ros_driver, cloned into Workcell/ros_ws/src/external) -->
+
+<xacro:include filename="$(find workcell_description)/urdf/ar4_static.xacro"/>
+
+<!-- ===================== Properties (edit these) ===================== -->
+
+<!-- myCobot: J1 axis in plan, base underside on top of the 19.05 mm JetCobot base plate.
+     yaw -90 deg turns the Yahboom URDF so that, at zero, the J2..J4 axes are parallel to
+     world X and the flange faces world -Y, as in the CAD (checked by FK: home flange within
+     ~3 mm of the CAD value). NOTE: J2, J3, J4 signs in the URDF are the opposite of the
+     CAD's: CAD [0, 40, -60, -60, 0, 0] deg = URDF [0, -40, 60, 60, 0, 0]. -->
+<xacro:property name="cobot_x"   value="0.67628"/>
+<xacro:property name="cobot_y"   value="0.18712"/>
+<xacro:property name="cobot_z"   value="0.0254"/>
+<xacro:property name="cobot_yaw" value="${-pi/2}"/>
+
+<!-- AR4 (static obstacle): J1 axis, enclosure-bottom height, heading, pose in degrees. -->
+<xacro:property name="ar4_x"   value="0.15017"/>
+<xacro:property name="ar4_y"   value="0.35627"/>
+<xacro:property name="ar4_z"   value="-0.00065"/>
+<xacro:property name="ar4_yaw" value="${pi/4}"/>  <!-- upstream "forward" is -Y; +45 deg points it to the front-right -->
+
+<!-- ===================== Materials (handoff colours) ===================== -->
+<material name="wc_plate">       <color rgba="0.85 0.85 0.82 1"/></material>
+<material name="wc_dark_grey">   <color rgba="0.25 0.25 0.25 1"/></material>
+<material name="wc_fixture">     <color rgba="0.95 0.95 0.95 1"/></material>
+<material name="wc_reject_red">  <color rgba="0.85 0.15 0.15 1"/></material>
+<material name="wc_accept_green"><color rgba="0.15 0.7 0.25 1"/></material>
+<material name="wc_vial_black">  <color rgba="0.08 0.08 0.08 1"/></material>
+<material name="wc_blue">        <color rgba="0.15 0.35 0.9 1"/></material>
+<material name="wc_yellow">      <color rgba="0.95 0.8 0.1 1"/></material>
+
+<!-- ===================== Macros ===================== -->
+
+<!-- A static part whose mesh is already in the world frame (mm). -->
+<xacro:macro name="static_part" params="name material">
+  <link name="${name}">
+    <visual>
+      <geometry>
+        <mesh filename="package://workcell_description/meshes/vial_inspection/${name}.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="${material}"/>
+    </visual>
+    <collision>
+      <geometry>
+        <mesh filename="package://workcell_description/meshes/vial_inspection/${name}.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="world_to_${name}" type="fixed">
+    <parent link="world"/>
+    <child link="${name}"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+</xacro:macro>
+
+<!-- ===================== Cell ===================== -->
+
+<link name="world"/>
+
+<xacro:static_part name="plate"              material="wc_plate"/>
+<xacro:static_part name="jetcobot_base"      material="wc_dark_grey"/>
+<xacro:static_part name="tray_fixture_front" material="wc_fixture"/>
+<xacro:static_part name="tray_fixture_back"  material="wc_fixture"/>
+<xacro:static_part name="vial_tray_front"    material="wc_reject_red"/>   <!-- "Reject" -->
+<xacro:static_part name="vial_tray_back"     material="wc_accept_green"/> <!-- "Accept" (per handoff, unconfirmed) -->
+<xacro:static_part name="vials_front"        material="wc_vial_black"/>
+<xacro:static_part name="vials_back"         material="wc_vial_black"/>
+<xacro:static_part name="screw_shute"        material="wc_yellow"/>
+<xacro:static_part name="tool_rack"          material="wc_blue"/>
+
+<!-- ===================== myCobot (JetCobot, gripper + camera) ===================== -->
+<!-- Yahboom's URDF, unchanged; its root link is "dummy". Joint names (1_Joint..6_Joint)
+     are kept so they match the real robot and the Jetson's MoveIt config. -->
+<xacro:include filename="$(find jetcobot_description)/urdf/jetcobot.urdf"/>
+
+<joint name="world_to_jetcobot" type="fixed">
+  <parent link="world"/>
+  <child link="dummy"/>
+  <origin xyz="${cobot_x} ${cobot_y} ${cobot_z}" rpy="0 0 ${cobot_yaw}"/>
+</joint>
+
+<!-- ===================== AR4 (static, CAD pose) ===================== -->
+<xacro:ar4_static parent="world"
+    xyz="${ar4_x} ${ar4_y} ${ar4_z}" yaw="${ar4_yaw}"
+    j1="0" j2="55" j3="52" j4="0" j5="-17" j6="0"/>
+
+</robot>
